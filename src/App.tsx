@@ -44,7 +44,8 @@ export default function App() {
     setData((d) => {
       const n = Date.now()
       const elapsed = duration(d.timer.phase, d.settings) - remainingMs(d.timer, n)
-      const rec: SessionRecord = { id: crypto.randomUUID?.() ?? `${n}-${Math.random().toString(36).slice(2)}`, // randomUUID needs HTTPS (LAN dev is http) phase: d.timer.phase, startedAt: n - elapsed, endedAt: n, completed }
+      // randomUUID exists only on HTTPS/localhost; LAN dev over http needs the fallback
+      const rec: SessionRecord = { id: crypto.randomUUID?.() ?? `${n}-${Math.random().toString(36).slice(2)}`, phase: d.timer.phase, startedAt: n - elapsed, endedAt: n, completed }
       return { ...d, timer: next(d.timer, d.settings, n), history: elapsed > 1000 ? [...d.history, rec] : d.history }
     })
     setNow(Date.now())
