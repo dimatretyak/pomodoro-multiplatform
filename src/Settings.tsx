@@ -23,21 +23,21 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
 
   return (
     <Panel open={open} title={t('Настройки', 'Settings')} side="right" onClose={onClose}>
-      <Section no="00" title={t('Язык', 'Language')}>
-        <div className="palettes langs">
-          {langs.map((l) => (
-            <button key={l} lang={l} aria-pressed={s.lang === l} onClick={() => set('lang', l)} className="pal press">
-              {langNames[l]}
-            </button>
-          ))}
-        </div>
-      </Section>
-
       <Section no="00" title={t('Тема', 'Theme')}>
         <div className="seg">
           {(['system', 'dark', 'light'] as const).map((th) => (
             <button key={th} aria-pressed={s.theme === th} onClick={() => set('theme', th)} className="press">
               {{ system: t('Авто', 'Auto'), dark: t('Тёмная', 'Dark'), light: t('Светлая', 'Light') }[th]}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section no="00" title={t('Язык', 'Language')}>
+        <div className="palettes langs">
+          {langs.map((l) => (
+            <button key={l} lang={l} aria-pressed={s.lang === l} onClick={() => set('lang', l)} className="pal press">
+              {langNames[l]}
             </button>
           ))}
         </div>
