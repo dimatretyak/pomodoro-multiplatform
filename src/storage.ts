@@ -11,6 +11,7 @@ export interface SessionRecord {
   endedAt: number
   completed: boolean // false = skipped
   task?: string // what the user was working on (focus records only)
+  updatedAt?: number // set when edited; newer wins on import/sync
 }
 
 export const TASK_MAX = 120
@@ -44,7 +45,8 @@ const PHASES = ['focus', 'short', 'long']
 const isRecord = (r: any): r is SessionRecord =>
   r && typeof r.id === 'string' && PHASES.includes(r.phase) && Number.isFinite(r.startedAt) &&
   Number.isFinite(r.endedAt) && r.endedAt >= r.startedAt && typeof r.completed === 'boolean' &&
-  (r.task === undefined || (typeof r.task === 'string' && r.task.length <= TASK_MAX))
+  (r.task === undefined || (typeof r.task === 'string' && r.task.length <= TASK_MAX)) &&
+  (r.updatedAt === undefined || Number.isFinite(r.updatedAt))
 
 /** Only known keys with the right type survive (imported file is untrusted). */
 function cleanSettings(raw: any): Partial<Settings> {
@@ -65,18 +67,23 @@ function cleanSettings(raw: any): Partial<Settings> {
 }
 
 /**
- * Merge an exported file into local data: history is a union by id,
- * settings win if the file's are newer. The running timer stays local.
+ * Merge an exported file into local data: history is a union by id (an edited copy with a
+ * newer updatedAt replaces the local one), settings win if newer. The running timer stays local.
  */
 export function mergeImport(cur: Data, raw: unknown): { data: Data; added: number } {
   const r = raw as any
   if (!r || typeof r !== 'object' || !Array.isArray(r.history)) throw new Error(t('Это не файл Pomidoro', 'Not a Pomidoro file'))
-  const ids = new Set(cur.history.map((h) => h.id))
-  const fresh = (r.history as unknown[]).filter(isRecord).filter((h) => !ids.has(h.id) && ids.add(h.id))
+  const byId = new Map(cur.history.map((h) => [h.id, h]))
+  let added = 0
+  for (const h of (r.history as unknown[]).filter(isRecord)) {
+    const mine = byId.get(h.id)
+    if (!mine) added++
+    if (!mine || (h.updatedAt ?? 0) > (mine.updatedAt ?? 0)) byId.set(h.id, h)
+  }
   const incoming = cleanSettings(r.settings)
   const settings = (incoming.updatedAt ?? 0) > cur.settings.updatedAt ? { ...cur.settings, ...incoming } : cur.settings
-  const history = [...cur.history, ...fresh].sort((a, b) => a.endedAt - b.endedAt)
-  return { data: { ...cur, settings, timer: retime(cur.timer, cur.settings, settings), history }, added: fresh.length }
+  const history = [...byId.values()].sort((a, b) => a.endedAt - b.endedAt)
+  return { data: { ...cur, settings, timer: retime(cur.timer, cur.settings, settings), history }, added }
 }
 
 export function download(d: Data) {
@@ -87,4 +94,14 @@ export function download(d: Data) {
   a.download = `pomidoro-${new Date().toISOString().slice(0, 10)}.json`
   a.click()
   URL.revokeObjectURL(a.href)
+}
+
+/** Edit a history record. Empty task removes it. Stamps updatedAt so the edit wins on merge. */
+export function editRecord(history: SessionRecord[], id: string, patch: { task?: string }, now: number): SessionRecord[] {
+  return history.map((h) => {
+    if (h.id !== id) return h
+    const { task: _, ...rest } = h
+    const task = patch.task?.trim().slice(0, TASK_MAX)
+    return { ...rest, ...(task ? { task } : {}), updatedAt: now }
+  })
 }

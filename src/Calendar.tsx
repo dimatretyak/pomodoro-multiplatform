@@ -1,14 +1,16 @@
 import { useMemo, useState } from 'react'
-import { byTask, dayRecords, focusByDay, midnight, monthCells } from './stats.ts'
+import { byTask, dayRecords, focusByDay, midnight, monthCells, recentTasks } from './stats.ts'
 import type { SessionRecord } from './storage.ts'
 import { getLang, sessionsWord, t } from './i18n.ts'
 import { phaseLabel } from './face.tsx'
 import Panel from './Panel.tsx'
+import RecordEditor from './RecordEditor.tsx'
 
 interface Props {
   open: boolean
   history: SessionRecord[]
   onClose: () => void
+  onEdit: (id: string, patch: { task: string }) => void
 }
 
 const fmtMin = (m: number) => {
@@ -16,7 +18,8 @@ const fmtMin = (m: number) => {
   return r < 60 ? `${r} ${t('мин', 'min')}` : `${Math.floor(r / 60)} ${t('ч', 'h')} ${r % 60} ${t('мин', 'min')}`
 }
 
-export default function Calendar({ open, history, onClose }: Props) {
+export default function Calendar({ open, history, onClose, onEdit }: Props) {
+  const [editing, setEditing] = useState<string | null>(null)
   const today = midnight(Date.now())
   const [cursor, setCursor] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }))
   const [day, setDay] = useState(today)
@@ -33,6 +36,7 @@ export default function Calendar({ open, history, onClose }: Props) {
   const isCurrentMonth = cursor.y === new Date().getFullYear() && cursor.m === new Date().getMonth()
 
   return (
+    <>
     <Panel open={open} title={t('Календарь', 'Calendar')} side="left" onClose={onClose}>
       <div className="cal-head">
         <button className="cal-nav press" onClick={() => shift(-1)} aria-label={t('Предыдущий месяц', 'Previous month')}>‹</button>
@@ -95,10 +99,15 @@ export default function Calendar({ open, history, onClose }: Props) {
             {recs.map((r) => (
               <li key={r.id} data-phase={r.phase} className={r.completed ? '' : 'skipped'}>
                 <span className="cal-time">{time(r.startedAt)}–{time(r.endedAt)}</span>
-                <span className="cal-what">
-                  {r.phase === 'focus' ? r.task || t('Фокус', 'Focus') : phaseLabel(r.phase)}
-                  {!r.completed && <em>{t('прервано', 'stopped')}</em>}
-                </span>
+                {r.phase === 'focus' ? (
+                  <button className="cal-what cal-edit" onClick={() => setEditing(r.id)} title={t('Изменить', 'Edit')}>
+                    <span className={r.task ? '' : 'muted'}>{r.task || t('Без задачи', 'No task')}</span>
+                    {!r.completed && <em>{t('прервано', 'stopped')}</em>}
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 20h4L19 9l-4-4L4 16zM14 6l4 4" /></svg>
+                  </button>
+                ) : (
+                  <span className="cal-what">{phaseLabel(r.phase)}</span>
+                )}
                 <span className="cal-dur">{fmtMin((r.endedAt - r.startedAt) / 60_000)}</span>
               </li>
             ))}
@@ -106,5 +115,16 @@ export default function Calendar({ open, history, onClose }: Props) {
         </>
       )}
     </Panel>
+    {/* sibling, not child: a panel nested in another inherits its open styles */}
+    <RecordEditor
+        record={history.find((h) => h.id === editing) ?? null}
+        recentTasks={recentTasks(history)}
+        onSave={(id, patch) => {
+          onEdit(id, patch)
+          setEditing(null)
+        }}
+        onClose={() => setEditing(null)}
+      />
+    </>
   )
 }

@@ -162,4 +162,8 @@ export default {
   "stopped": "已中断",
   "the file is corrupted": "文件已损坏",
   "vs previous week": "与上周相比",
+  "Edit session": "编辑记录",
+  "What you worked on": "做了什么",
+  "Save": "保存",
+  "Edit": "编辑",
 } satisfies Record<string, string>

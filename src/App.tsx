@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Settings as S } from './timer.ts'
-import { download, load, mergeImport, save, TASK_MAX, type SessionRecord } from './storage.ts'
+import { download, editRecord, load, mergeImport, save, TASK_MAX, type SessionRecord } from './storage.ts'
 import { chime, clockTick, notify, tick, unlock } from './alerts.ts'
 import { byId, stepAt } from './exercises.ts'
 import { recentTasks, streak } from './stats.ts'
@@ -214,7 +214,12 @@ export default function App() {
         <Instrument {...props} />
       </main>
       <Stats open={panel === 'stats'} history={history} onClose={() => setPanel(null)} />
-      <Calendar open={panel === 'calendar'} history={history} onClose={() => setPanel(null)} />
+      <Calendar
+        open={panel === 'calendar'}
+        history={history}
+        onClose={() => setPanel(null)}
+        onEdit={(id, patch) => setData((d) => ({ ...d, history: editRecord(d.history, id, patch, Date.now()) }))}
+      />
       <Hotkeys open={panel === 'help'} onClose={() => setPanel(null)} />
       <Confirm
         open={panel === 'reset'}

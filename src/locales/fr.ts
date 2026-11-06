@@ -162,4 +162,8 @@ export default {
   "stopped": "interrompue",
   "the file is corrupted": "le fichier est corrompu",
   "vs previous week": "vs semaine précédente",
+  "Edit session": "Modifier la session",
+  "What you worked on": "Sur quoi vous avez travaillé",
+  "Save": "Enregistrer",
+  "Edit": "Modifier",
 } satisfies Record<string, string>

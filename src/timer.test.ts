@@ -173,3 +173,22 @@ test('other languages: lookup, placeholders, plurals', () => {
   assert.equal(t('нет', 'not translated anywhere'), 'not translated anywhere') // falls back to English
   setLang('ru')
 })
+
+import { editRecord } from './storage.ts'
+
+test('edit history record and merge edits by updatedAt', () => {
+  const base = { id: 'a', phase: 'focus' as const, startedAt: 0, endedAt: 10, completed: true }
+  const [edited] = editRecord([base], 'a', { task: '  Write docs  ' }, 50)
+  assert.deepEqual(edited, { ...base, task: 'Write docs', updatedAt: 50 })
+  const [cleared] = editRecord([edited], 'a', { task: '   ' }, 60)
+  assert.equal('task' in cleared, false)
+  assert.equal(editRecord([base], 'zzz', { task: 'x' }, 1)[0], base) // untouched by reference
+
+  const cur = { settings: { ...defaultSettings }, timer: initialState(defaultSettings), history: [edited], task: '' }
+  const older = { ...base, task: 'Old name', updatedAt: 10 }
+  const newer = { ...base, task: 'New name', updatedAt: 99 }
+  assert.equal(mergeImport(cur, { history: [older] }).data.history[0].task, 'Write docs')
+  const r = mergeImport(cur, { history: [newer] })
+  assert.equal(r.data.history[0].task, 'New name')
+  assert.equal(r.added, 0) // an update, not a new record
+})

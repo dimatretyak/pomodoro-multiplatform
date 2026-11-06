@@ -162,4 +162,8 @@ export default {
   "stopped": "中断",
   "the file is corrupted": "ファイルが壊れています",
   "vs previous week": "前週比",
+  "Edit session": "セッションを編集",
+  "What you worked on": "取り組んだこと",
+  "Save": "保存",
+  "Edit": "編集",
 } satisfies Record<string, string>
