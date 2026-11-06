@@ -52,7 +52,6 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
             </button>
           ))}
         </div>
-        <p className="set-note mt-2">{t('Цвета фокуса, короткого и длинного перерыва.', 'Colors for focus, short and long breaks.')}</p>
       </Section>
 
       <Section no="01" title={t('Длительность', 'Durations')}>
@@ -89,7 +88,7 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
       </Section>
 
       <Section no="04" title={t('Данные', 'Data')}>
-        <p className="set-note">{t('Файл переносит историю и настройки на другое устройство. При импорте история объединяется.', 'A file moves history and settings to another device. Import merges the history.')}</p>
+        <p className="set-note">{t('Все данные хранятся только в этом браузере. Файл переносит историю и настройки на другое устройство, при импорте история объединяется.', 'All data stays in this browser. A file moves history and settings to another device; import merges the history.')}</p>
         <div className="seg">
           <button onClick={onExport} className="press">{t('Экспорт', 'Export')}</button>
           <label className="press seg-label">
@@ -109,7 +108,6 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
         {msg && <p className="set-note fade-up mt-2" role="status">{msg}</p>}
       </Section>
 
-      <p className="set-note mt-6">{t('Все данные хранятся только в этом браузере. Горячие клавиши: ?', 'All data stays in this browser. Keyboard shortcuts: ?')}</p>
     </Panel>
   )
 }
