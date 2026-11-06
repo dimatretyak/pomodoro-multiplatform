@@ -34,3 +34,14 @@ test('pause/resume keeps remaining time', () => {
   assert.equal(fmt(24 * 60_000 - 1), '24:00')
   assert.equal(fmt(0), '00:00')
 })
+
+import { byId, stepAt } from './exercises.ts'
+
+test('exercise steps: linear ends, breathing loops', () => {
+  const neck = byId('neck')!
+  assert.deepEqual(stepAt(neck, 0), { index: 0, left: 20 })
+  assert.deepEqual(stepAt(neck, 25), { index: 1, left: 15 })
+  assert.equal(stepAt(neck, 80), null)
+  const box = byId('box')!
+  assert.deepEqual(stepAt(box, 16 * 3 + 5), { index: 1, left: 3 })
+})
