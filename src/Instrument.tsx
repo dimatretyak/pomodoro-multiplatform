@@ -18,8 +18,7 @@ export default function Instrument(p: FaceProps) {
       <header className="ins-top">
         <button onClick={p.onStats} aria-label={t('Статистика', 'Stats')} title={t('Статистика (A)', 'Stats (A)')} className="ins-icon press"><IconStats /></button>
         <button onClick={p.onCalendar} aria-label={t('Календарь', 'Calendar')} title={t('Календарь (C)', 'Calendar (C)')} className="ins-icon press"><IconCalendar /></button>
-        <span>POMIDORO</span>
-        <span><i className="ins-led" /> {String(Math.min(p.done + 1, p.longEvery)).padStart(2, '0')} / {String(p.longEvery).padStart(2, '0')}</span>
+        <span className="flex-1" />
         <button onClick={p.onHelp} aria-label={t('Горячие клавиши', 'Keyboard shortcuts')} title={t('Горячие клавиши (?)', 'Keyboard shortcuts (?)')} className="ins-icon ins-keys press"><IconKeys /></button>
         <button onClick={p.onSettings} aria-label={t('Настройки', 'Settings')} title={t('Настройки (S)', 'Settings (S)')} className="ins-icon press"><IconSettings /></button>
       </header>

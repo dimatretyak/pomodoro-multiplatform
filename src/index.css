@@ -79,13 +79,9 @@ button:disabled:active { transform: none; }
 
 /* ───────── Main screen ───────── */
 .ins { position: relative; max-width: 420px; min-height: 100dvh; margin: 0 auto; padding: 22px 24px 28px; display: flex; flex-direction: column; align-items: center; }
-.ins-top { width: 100%; display: grid; grid-template-columns: 44px 44px 1fr auto auto 44px; align-items: center; gap: 8px; font: 500 10.5px var(--mono); letter-spacing: 0.22em; color: var(--muted); }
-.ins-top > span:nth-of-type(1) { padding-left: 4px; overflow: hidden; text-overflow: ellipsis; }
-.ins-top > span:nth-of-type(2) { white-space: nowrap; }
-@media (max-width: 440px) { .ins-top > span:nth-of-type(1) { visibility: hidden; } }
+.ins-top { width: 100%; display: flex; align-items: center; gap: 8px; }
 .ins-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; color: var(--muted); }
 .ins-icon:hover { color: var(--fg); background: var(--hover); }
-.ins-led { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 6px var(--acc); vertical-align: 1px; margin-right: 4px; }
 
 .ins-dial { position: relative; width: min(304px, 84vw); aspect-ratio: 1; margin-top: auto; }
 .ins-dial svg { width: 100%; height: 100%; overflow: visible; }
