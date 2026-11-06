@@ -68,6 +68,11 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
           <Switch label={t('Автостарт перерывов', 'Auto-start breaks')} on={s.autoStartBreaks} onChange={() => set('autoStartBreaks', !s.autoStartBreaks)} />
           <Switch label={t('Автостарт фокуса', 'Auto-start focus')} on={s.autoStartFocus} onChange={() => set('autoStartFocus', !s.autoStartFocus)} />
           <Switch label={t('Звук', 'Sound')} on={s.sound} onChange={() => set('sound', !s.sound)} />
+          {s.sound && (
+            <div className="set-nested fade-up">
+              <Switch label={t('Тиканье во время фокуса', 'Ticking during focus')} on={s.ticking} onChange={() => set('ticking', !s.ticking)} />
+            </div>
+          )}
         </div>
       </Section>
 

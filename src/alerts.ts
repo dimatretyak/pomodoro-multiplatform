@@ -5,6 +5,27 @@ export const tick = () => tones([523], 0.12, 0.6)
 
 export const chime = () => tones([660, 880, 1320], 0.25, 1.2)
 
+let noise: AudioBuffer | null = null
+/** Clock tick: a 25 ms band-passed noise click; `tock` is slightly lower, like a real escapement. */
+export function clockTick(tock: boolean) {
+  ctx ??= new AudioContext()
+  if (!noise) {
+    noise = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.025), ctx.sampleRate)
+    const d = noise.getChannelData(0)
+    for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length) ** 4
+  }
+  const src = ctx.createBufferSource()
+  src.buffer = noise
+  const bp = ctx.createBiquadFilter()
+  bp.type = 'bandpass'
+  bp.frequency.value = tock ? 2600 : 3400
+  bp.Q.value = 6
+  const g = ctx.createGain()
+  g.gain.value = 0.35
+  src.connect(bp).connect(g).connect(ctx.destination)
+  src.start()
+}
+
 function tones(freqs: number[], vol: number, len: number) {
   ctx ??= new AudioContext()
   const t = ctx.currentTime

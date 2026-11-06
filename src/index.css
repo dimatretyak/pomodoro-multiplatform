@@ -158,6 +158,8 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; 
 .set-h { display: flex; align-items: center; gap: 10px; font: 500 10px var(--mono); letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .set-h::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 .set-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px dashed var(--dash); font-size: 14px; color: var(--text); }
+.set-nested .set-row { padding-left: 18px; font-size: 13.5px; position: relative; }
+.set-nested .set-row::before { content: '└'; position: absolute; left: 2px; color: var(--faint); font-family: var(--mono); }
 .set-note { font-size: 12.5px; line-height: 1.5; color: var(--muted); margin: 4px 0 6px; }
 .set-sub { font: 400 10px var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--faint); margin: 14px 0 8px; }
 

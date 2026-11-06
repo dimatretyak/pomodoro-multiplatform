@@ -17,6 +17,7 @@ export interface Settings {
   autoStartBreaks: boolean
   autoStartFocus: boolean
   sound: boolean
+  ticking: boolean // clock ticking during focus, needs `sound`
   exercises: string[] // enabled exercise ids, may be empty
   palette: Palette
   theme: 'system' | 'dark' | 'light'
@@ -41,6 +42,7 @@ export const defaultSettings: Settings = {
   autoStartBreaks: true,
   autoStartFocus: false,
   sound: true,
+  ticking: false,
   exercises: ['box', 'rule-20', 'neck'],
   palette: 'classic',
   theme: 'system',

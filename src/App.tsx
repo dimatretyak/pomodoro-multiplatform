@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Settings as S } from './timer.ts'
 import { download, load, mergeImport, save, type SessionRecord } from './storage.ts'
-import { chime, notify, tick, unlock } from './alerts.ts'
+import { chime, clockTick, notify, tick, unlock } from './alerts.ts'
 import { byId, stepAt } from './exercises.ts'
 import { streak } from './stats.ts'
 import { sessionsWord, setLang, t } from './i18n.ts'
@@ -88,6 +88,26 @@ export default function App() {
     }, Math.max(0, timer.endAt - Date.now()))
     return () => clearTimeout(id)
   }, [timer.endAt, timer.phase, settings.sound, advance])
+
+  // Clock ticking during focus, aligned to the timer's whole seconds.
+  const ticking = running && timer.phase === 'focus' && settings.sound && settings.ticking
+  useEffect(() => {
+    if (!ticking || timer.endAt === null) return
+    const endAt = timer.endAt
+    let id = 0
+    const beat = () => {
+      const s = Math.round((endAt - Date.now()) / 1000)
+      if (s > 0) clockTick(s % 2 === 0)
+    }
+    const first = setTimeout(() => {
+      beat()
+      id = window.setInterval(beat, 1000)
+    }, (endAt - Date.now()) % 1000)
+    return () => {
+      clearTimeout(first)
+      clearInterval(id)
+    }
+  }, [ticking, timer.endAt])
 
   const toggle = useCallback(() => {
     unlock()
