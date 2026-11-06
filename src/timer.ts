@@ -88,6 +88,10 @@ export const reset = (t: TimerState, s: Settings): TimerState => ({
   remaining: duration(t.phase, s),
 })
 
+/** After a settings change: an untouched paused timer picks up the new duration; progress is kept otherwise. */
+export const retime = (t: TimerState, prev: Settings, s: Settings): TimerState =>
+  t.endAt === null && t.remaining === duration(t.phase, prev) ? reset(t, s) : t
+
 export const fmt = (ms: number) => {
   const sec = Math.ceil(ms / 1000)
   return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`

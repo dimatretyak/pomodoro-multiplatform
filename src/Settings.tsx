@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { categories, exercises, type Category } from './exercises.ts'
 import type { Settings as S } from './timer.ts'
 import Panel from './Panel.tsx'
@@ -7,11 +8,14 @@ interface Props {
   settings: S
   onClose: () => void
   onChange: (s: S) => void
+  onExport: () => void
+  onImport: (file: File) => Promise<string> // resolves to a status message
 }
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(v) || min))
 
-export default function Settings({ open, settings: s, onClose, onChange }: Props) {
+export default function Settings({ open, settings: s, onClose, onChange, onExport, onImport }: Props) {
+  const [msg, setMsg] = useState('')
   const set = <K extends keyof S>(k: K, v: S[K]) => onChange({ ...s, [k]: v })
   const toggleEx = (id: string) =>
     set('exercises', s.exercises.includes(id) ? s.exercises.filter((x) => x !== id) : [...s.exercises, id])
@@ -57,6 +61,31 @@ export default function Settings({ open, settings: s, onClose, onChange }: Props
               ))}
             </div>
           ))}
+        </Section>
+
+        <Section title="Данные">
+          <p className="-mt-1 mb-3 text-[13px] text-(--muted)">
+            Файл переносит историю и настройки на другое устройство. При импорте история объединяется.
+          </p>
+          <div className="flex gap-2">
+            <button onClick={onExport} className="press flex-1 rounded-xl border border-(--line) bg-(--surface) py-2 text-sm hover:border-(--line-2)">
+              Экспорт
+            </button>
+            <label className="press flex-1 cursor-pointer rounded-xl border border-(--line) bg-(--surface) py-2 text-center text-sm hover:border-(--line-2) has-focus-visible:border-(--accent)">
+              Импорт
+              <input
+                type="file"
+                accept="application/json,.json"
+                className="sr-only"
+                onChange={async (e) => {
+                  const f = e.currentTarget.files?.[0]
+                  e.currentTarget.value = ''
+                  if (f) setMsg(await onImport(f))
+                }}
+              />
+            </label>
+          </div>
+          {msg && <p className="fade-up mt-2 text-[13px] text-(--muted)" role="status">{msg}</p>}
         </Section>
 
         <p className="mt-6 text-xs leading-relaxed text-(--muted)">

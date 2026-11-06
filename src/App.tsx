@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { duration, fmt, next, pause, remainingMs, reset, start, type Phase, type Settings as S } from './timer.ts'
-import { load, save, type SessionRecord } from './storage.ts'
+import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Phase, type Settings as S } from './timer.ts'
+import { download, load, mergeImport, save, type SessionRecord } from './storage.ts'
 import { chime, notify, unlock } from './alerts.ts'
 import { byId } from './exercises.ts'
 import BreakView from './BreakView.tsx'
@@ -89,8 +89,19 @@ export default function App() {
     setData((d) => ({
       ...d,
       settings: { ...s, updatedAt: Date.now() },
-      timer: d.timer.endAt === null && d.timer.remaining === duration(d.timer.phase, d.settings) ? reset(d.timer, s) : d.timer,
+      timer: retime(d.timer, d.settings, s),
     }))
+
+  const importFile = async (f: File) => {
+    try {
+      const raw = JSON.parse(await f.text())
+      const { added } = mergeImport(data, raw) // validates; throws on a bad file
+      setData((d) => mergeImport(d, raw).data) // merge into latest state, not the closure
+      return `Импортировано: ${added} ${sessionsWord(added)}`
+    } catch (e) {
+      return `Не удалось импортировать: ${e instanceof SyntaxError ? 'файл повреждён' : (e as Error).message}`
+    }
+  }
 
   const swapExercise = () =>
     setData((d) => {
@@ -205,7 +216,14 @@ export default function App() {
       </div>
 
       <Stats open={statsOpen} history={history} onClose={() => setStatsOpen(false)} />
-      <Settings open={open} settings={settings} onClose={() => setOpen(false)} onChange={saveSettings} />
+      <Settings
+        open={open}
+        settings={settings}
+        onClose={() => setOpen(false)}
+        onChange={saveSettings}
+        onExport={() => download(data)}
+        onImport={importFile}
+      />
     </main>
     </>
   )
