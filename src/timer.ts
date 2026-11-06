@@ -1,10 +1,12 @@
 export type Phase = 'focus' | 'short' | 'long'
 // Colors live in index.css under [data-palette=…]; this is the list of ids and names.
 import { browserLang, type L, type Lang } from './i18n.ts'
-export const palettes: Record<'classic' | 'ocean' | 'sunset' | 'forest' | 'neon' | 'amber' | 'mono', L> = {
+export const palettes = {
   classic: ['Классика', 'Classic'], ocean: ['Океан', 'Ocean'], sunset: ['Закат', 'Sunset'], forest: ['Лес', 'Forest'],
   neon: ['Неон', 'Neon'], amber: ['Янтарь', 'Amber'], mono: ['Монохром', 'Mono'],
-}
+  lavender: ['Лаванда', 'Lavender'], cherry: ['Вишня', 'Cherry'], citrus: ['Цитрус', 'Citrus'], arctic: ['Арктика', 'Arctic'],
+  retro: ['Ретро', 'Retro'], fjord: ['Фьорд', 'Fjord'], sakura: ['Сакура', 'Sakura'],
+} satisfies Record<string, L>
 export type Palette = keyof typeof palettes
 
 export interface Settings {

@@ -28,10 +28,11 @@ html[data-theme='light'] {
   --panel: #f8f4ef; --hover: #0000000a; --off: #e6dfd5; --knob: #b5aba1; --tip: #fffdfaf2;
   --chip-fg: #6b6058; --dash: #ddd4c8; --on-acc: #fff; --scrim: #3a2e2440; --ring: #0000000a;
   --grain: 0.35; --grain-blend: multiply; --inset: #0002;
-  --acc: color-mix(in oklab, var(--c-focus) 82%, #000);
+  /* Cap lightness so every palette keeps ≥3:1 on paper; hue and chroma stay. */
+  --acc: oklch(from var(--c-focus) min(l, 0.55) c h);
 }
-html[data-theme='light'][data-phase='short'] { --acc: color-mix(in oklab, var(--c-short) 78%, #000); }
-html[data-theme='light'][data-phase='long'] { --acc: color-mix(in oklab, var(--c-long) 82%, #000); }
+html[data-theme='light'][data-phase='short'] { --acc: oklch(from var(--c-short) min(l, 0.55) c h); }
+html[data-theme='light'][data-phase='long'] { --acc: oklch(from var(--c-long) min(l, 0.55) c h); }
 html[data-theme='light'][data-palette='mono'], [data-theme='light'] .pal[data-palette='mono'] { --c-focus: #2a231e; --c-short: #6b625b; --c-long: #463d36; }
 
 /* Palettes: focus / short break / long break. Also used by the previews in settings. */
@@ -42,6 +43,13 @@ html[data-theme='light'][data-palette='mono'], [data-theme='light'] .pal[data-pa
 [data-palette='neon'] { --c-focus: #ff3ea5; --c-short: #3ef0ff; --c-long: #c6ff3e; }
 [data-palette='amber'] { --c-focus: #ffb020; --c-short: #ffd98a; --c-long: #ff8a3d; }
 [data-palette='mono'] { --c-focus: #f3ede6; --c-short: #b8b0a8; --c-long: #d9d0c7; }
+[data-palette='lavender'] { --c-focus: #b18cff; --c-short: #7fd6c2; --c-long: #ff9ecf; }
+[data-palette='cherry'] { --c-focus: #ff3b5c; --c-short: #ff9a8b; --c-long: #b38cff; }
+[data-palette='citrus'] { --c-focus: #ffd23f; --c-short: #7be495; --c-long: #ff8c42; }
+[data-palette='arctic'] { --c-focus: #8fe3ff; --c-short: #b6f0de; --c-long: #a7b4ff; }
+[data-palette='retro'] { --c-focus: #e76f51; --c-short: #2a9d8f; --c-long: #e9c46a; }
+[data-palette='fjord'] { --c-focus: #88c0d0; --c-short: #a3be8c; --c-long: #b48ead; }
+[data-palette='sakura'] { --c-focus: #ff8fab; --c-short: #9fdcc8; --c-long: #c9a7ff; }
 
 body {
   margin: 0;
