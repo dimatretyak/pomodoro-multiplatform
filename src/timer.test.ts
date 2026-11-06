@@ -115,3 +115,28 @@ test('plurals in both languages', () => {
   assert.deepEqual([1, 2, 0].map(w), ['day', 'days', 'days'])
   setLang('ru')
 })
+
+import { byTask, dayRecords, monthCells, recentTasks } from './stats.ts'
+
+test('calendar helpers', () => {
+  // Nov 2026 starts on a Sunday: 6 blanks with Monday weeks, 0 with Sunday weeks
+  assert.equal(monthCells(2026, 10, 1).filter((c) => c === null).length, 6)
+  assert.equal(monthCells(2026, 10, 0).filter((c) => c === null).length, 0)
+  assert.equal(monthCells(2026, 10, 1).filter(Boolean).length, 30)
+  const at = (d: number, h: number, min: number, task?: string, completed = true, phase = 'focus' as const) => {
+    const end = new Date(2026, 10, d, h).getTime()
+    return { id: `${d}${h}${task}`, phase, startedAt: end - min * 60_000, endedAt: end, completed, task }
+  }
+  const hist = [at(5, 9, 25, 'A'), at(6, 11, 25, 'B'), at(6, 9, 25, 'A'), at(6, 10, 25, 'A'), at(6, 12, 10, 'A', false), at(6, 13, 25)]
+  const day = new Date(2026, 10, 6).getTime()
+  assert.deepEqual(dayRecords(hist, day).map((h) => new Date(h.endedAt).getHours()), [9, 10, 11, 12, 13])
+  assert.deepEqual(byTask(dayRecords(hist, day)), [['A', 50], ['B', 25], ['', 25]])
+  assert.deepEqual(recentTasks(hist), ['A', 'B'])
+})
+
+test('import keeps valid task, rejects oversized', () => {
+  const cur = { settings: { ...defaultSettings }, timer: initialState(defaultSettings), history: [], task: '' }
+  const rec = (id: string, task: unknown) => ({ id, phase: 'focus', startedAt: 0, endedAt: 10, completed: true, task })
+  const { data } = mergeImport(cur, { history: [rec('ok', 'Write docs'), rec('none', undefined), rec('big', 'x'.repeat(500)), rec('num', 5)] })
+  assert.deepEqual(data.history.map((h) => h.id), ['ok', 'none'])
+})

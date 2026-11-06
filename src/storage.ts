@@ -10,7 +10,10 @@ export interface SessionRecord {
   startedAt: number
   endedAt: number
   completed: boolean // false = skipped
+  task?: string // what the user was working on (focus records only)
 }
+
+export const TASK_MAX = 120
 
 const KEY = 'pomidoro:v1'
 
@@ -18,6 +21,7 @@ export interface Data {
   settings: Settings
   timer: TimerState
   history: SessionRecord[]
+  task: string // current "what are you working on"
 }
 
 export function load(): Data {
@@ -25,12 +29,13 @@ export function load(): Data {
     const raw = JSON.parse(localStorage.getItem(KEY) ?? 'null')
     if (raw) {
       const settings = { ...defaultSettings, ...raw.settings }
-      return { settings, timer: { ...initialState(settings), ...raw.timer }, history: raw.history ?? [] }
+      const task = typeof raw.task === 'string' ? raw.task.slice(0, TASK_MAX) : ''
+      return { settings, timer: { ...initialState(settings), ...raw.timer }, history: raw.history ?? [], task }
     }
   } catch {
     // corrupted storage: start fresh rather than crash
   }
-  return { settings: defaultSettings, timer: initialState(defaultSettings), history: [] }
+  return { settings: defaultSettings, timer: initialState(defaultSettings), history: [], task: '' }
 }
 
 export const save = (d: Data) => localStorage.setItem(KEY, JSON.stringify(d))
@@ -38,7 +43,8 @@ export const save = (d: Data) => localStorage.setItem(KEY, JSON.stringify(d))
 const PHASES = ['focus', 'short', 'long']
 const isRecord = (r: any): r is SessionRecord =>
   r && typeof r.id === 'string' && PHASES.includes(r.phase) && Number.isFinite(r.startedAt) &&
-  Number.isFinite(r.endedAt) && r.endedAt >= r.startedAt && typeof r.completed === 'boolean'
+  Number.isFinite(r.endedAt) && r.endedAt >= r.startedAt && typeof r.completed === 'boolean' &&
+  (r.task === undefined || (typeof r.task === 'string' && r.task.length <= TASK_MAX))
 
 /** Only known keys with the right type survive (imported file is untrusted). */
 function cleanSettings(raw: any): Partial<Settings> {

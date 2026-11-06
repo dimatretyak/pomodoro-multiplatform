@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Settings as S } from './timer.ts'
-import { download, load, mergeImport, save, type SessionRecord } from './storage.ts'
+import { download, load, mergeImport, save, TASK_MAX, type SessionRecord } from './storage.ts'
 import { chime, clockTick, notify, tick, unlock } from './alerts.ts'
 import { byId, stepAt } from './exercises.ts'
-import { streak } from './stats.ts'
+import { recentTasks, streak } from './stats.ts'
 import { sessionsWord, setLang, t } from './i18n.ts'
 import Settings from './Settings.tsx'
 import Stats from './Stats.tsx'
@@ -11,12 +11,13 @@ import { phaseLabel, type FaceProps } from './face.tsx'
 import Instrument from './Instrument.tsx'
 import Hotkeys from './Hotkeys.tsx'
 import Confirm from './Confirm.tsx'
+import Calendar from './Calendar.tsx'
 
 export default function App() {
   const [data, setData] = useState(load)
   const [now, setNow] = useState(Date.now)
   // reset/skip are confirmation modals
-  const [panel, setPanel] = useState<'settings' | 'stats' | 'help' | 'reset' | 'skip' | null>(null)
+  const [panel, setPanel] = useState<'settings' | 'stats' | 'calendar' | 'help' | 'reset' | 'skip' | null>(null)
   const { settings, timer, history } = data
   setLang(settings.lang) // before any child renders; see i18n.ts
   const running = timer.endAt !== null
@@ -65,6 +66,8 @@ export default function App() {
       const elapsed = duration(d.timer.phase, d.settings) - remainingMs(d.timer, n)
       // randomUUID exists only on HTTPS/localhost; LAN dev over http needs the fallback
       const rec: SessionRecord = { id: crypto.randomUUID?.() ?? `${n}-${Math.random().toString(36).slice(2)}`, phase: d.timer.phase, startedAt: n - elapsed, endedAt: n, completed }
+      const task = d.task.trim()
+      if (task && d.timer.phase === 'focus') rec.task = task
       return { ...d, timer: next(d.timer, d.settings, n), history: elapsed > 1000 ? [...d.history, rec] : d.history }
     })
     setNow(Date.now())
@@ -172,6 +175,10 @@ export default function App() {
     onSwap: swapExercise,
     onSettings: () => setPanel('settings'),
     onStats: () => setPanel('stats'),
+    onCalendar: () => setPanel('calendar'),
+    task: data.task,
+    recentTasks: recentTasks(history),
+    onTask: (task: string) => setData((d) => ({ ...d, task: task.slice(0, TASK_MAX) })),
     onHelp: () => setPanel('help'),
   }
 
@@ -186,11 +193,13 @@ export default function App() {
       if (e.code === 'Slash' && e.shiftKey) flip('help')
       else if (e.code === 'KeyA') flip('stats')
       else if (e.code === 'KeyS') flip('settings')
+      else if (e.code === 'KeyC') flip('calendar')
       else if (open) return // timer keys only on the main screen
       else if (e.code === 'Space') p.onToggle()
       else if (e.code === 'KeyR') p.onReset()
       else if (e.code === 'KeyN' || e.code === 'ArrowRight') p.onSkip()
       else if (e.code === 'KeyE' && p.exercise && p.canSwap) p.onSwap()
+      else if (e.code === 'KeyT') document.querySelector<HTMLInputElement>('.ins-task')?.focus()
       else return
       e.preventDefault()
     }
@@ -204,6 +213,7 @@ export default function App() {
         <Instrument {...props} />
       </main>
       <Stats open={panel === 'stats'} history={history} onClose={() => setPanel(null)} />
+      <Calendar open={panel === 'calendar'} history={history} onClose={() => setPanel(null)} />
       <Hotkeys open={panel === 'help'} onClose={() => setPanel(null)} />
       <Confirm
         open={panel === 'reset'}

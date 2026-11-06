@@ -1,5 +1,5 @@
 import { t, tr } from './i18n.ts'
-import { actionLabel, IconKeys, IconPause, IconPlay, IconSettings, IconStats, split, stepInfo, type FaceProps } from './face.tsx'
+import { actionLabel, IconCalendar, IconKeys, IconPause, IconPlay, IconSettings, IconStats, split, stepInfo, type FaceProps } from './face.tsx'
 
 const TICKS = Array.from({ length: 60 }, (_, i) => {
   const a = (i / 60) * Math.PI * 2, major = i % 5 === 0, r1 = major ? 124 : 132, r2 = 144
@@ -17,11 +17,30 @@ export default function Instrument(p: FaceProps) {
     <div className="ins">
       <header className="ins-top">
         <button onClick={p.onStats} aria-label={t('Статистика', 'Stats')} title={t('Статистика (A)', 'Stats (A)')} className="ins-icon press"><IconStats /></button>
+        <button onClick={p.onCalendar} aria-label={t('Календарь', 'Calendar')} title={t('Календарь (C)', 'Calendar (C)')} className="ins-icon press"><IconCalendar /></button>
         <span>POMIDORO</span>
         <span><i className="ins-led" /> {String(Math.min(p.done + 1, p.longEvery)).padStart(2, '0')} / {String(p.longEvery).padStart(2, '0')}</span>
         <button onClick={p.onHelp} aria-label={t('Горячие клавиши', 'Keyboard shortcuts')} title={t('Горячие клавиши (?)', 'Keyboard shortcuts (?)')} className="ins-icon ins-keys press"><IconKeys /></button>
         <button onClick={p.onSettings} aria-label={t('Настройки', 'Settings')} title={t('Настройки (S)', 'Settings (S)')} className="ins-icon press"><IconSettings /></button>
       </header>
+
+      <label className="ins-task-wrap">
+        <span className="sr-only">{t('Над чем работаем', 'What are you working on')}</span>
+        <input
+          className="ins-task select-text"
+          value={p.task}
+          onChange={(e) => p.onTask(e.currentTarget.value)}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === 'Escape') && e.currentTarget.blur()}
+          placeholder={t('Над чем работаем?', 'What are you working on?')}
+          list="ins-tasks"
+          maxLength={120}
+          enterKeyHint="done"
+          autoComplete="off"
+          spellCheck={false}
+          title={t('Задача (T)', 'Task (T)')}
+        />
+        <datalist id="ins-tasks">{p.recentTasks.map((x) => <option key={x} value={x} />)}</datalist>
+      </label>
 
       <div className="ins-dial" key={p.phase}>
         <svg viewBox="0 0 304 304" aria-hidden>

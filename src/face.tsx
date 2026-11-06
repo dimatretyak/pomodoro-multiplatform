@@ -22,6 +22,10 @@ export interface FaceProps {
   onSettings: () => void
   onStats: () => void
   onHelp: () => void
+  onCalendar: () => void
+  task: string
+  recentTasks: string[]
+  onTask: (task: string) => void
 }
 
 export const phaseLabel = (p: Phase) => ({ focus: t('Фокус', 'Focus'), short: t('Короткий перерыв', 'Short break'), long: t('Длинный перерыв', 'Long break') })[p]
@@ -58,6 +62,7 @@ export const IconKeys = () => (
     <path d="M9.8 9.2a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1.1.9-1.1 1.6v.3M12 15.9h.01" />
   </svg>
 )
+export const IconCalendar = () => <I d="M4 6.5h16v13H4zM4 10.5h16M8.5 3.5v5M15.5 3.5v5" />
 export const IconReset = () => <I d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
 export const IconSkip = () => <I d="M5 4l10 8-10 8zM19 5v14" />
 export const IconPlay = ({ size = 22 }) => (
