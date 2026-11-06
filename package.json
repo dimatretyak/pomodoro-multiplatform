@@ -6,7 +6,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "node --test src/*.test.ts",
-    "cert": "mkdir -p .cert && openssl req -x509 -newkey rsa:2048 -nodes -days 365 -keyout .cert/key.pem -out .cert/cert.pem -subj /CN=pomidoro-dev -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$(ipconfig getifaddr en0 || echo 127.0.0.1)\"",
+    "cert": "IP=$(ipconfig getifaddr en0 || echo 127.0.0.1) && mkdir -p .cert && openssl req -x509 -newkey rsa:2048 -nodes -days 30 -keyout .cert/key.pem -out .cert/cert.pem -subj /CN=pomidoro-dev -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$IP\" -addext \"nameConstraints=critical,permitted;DNS:localhost,permitted;IP:127.0.0.1/255.255.255.255,permitted;IP:$IP/255.255.255.255\" && chmod 600 .cert/key.pem",
     "dev:https": "HTTPS=1 vite --host",
     "preview:https": "vite build && HTTPS=1 vite preview --host"
   },
