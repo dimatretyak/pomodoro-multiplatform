@@ -9,11 +9,13 @@ import Stats, { sessionsWord } from './Stats.tsx'
 import { phaseLabel, type FaceProps } from './face.tsx'
 import Instrument from './Instrument.tsx'
 import Hotkeys from './Hotkeys.tsx'
+import Confirm from './Confirm.tsx'
 
 export default function App() {
   const [data, setData] = useState(load)
   const [now, setNow] = useState(Date.now)
-  const [panel, setPanel] = useState<'settings' | 'stats' | 'help' | null>(null)
+  // reset/skip are confirmation modals
+  const [panel, setPanel] = useState<'settings' | 'stats' | 'help' | 'reset' | 'skip' | null>(null)
   const { settings, timer, history } = data
   const running = timer.endAt !== null
   const left = remainingMs(timer, now)
@@ -115,6 +117,14 @@ export default function App() {
       return { ...d, timer: { ...d.timer, exerciseId: pool[i] } }
     })
 
+  // A phase that ends naturally while a confirm is open makes it stale.
+  useEffect(() => setPanel((p) => (p === 'reset' || p === 'skip' ? null : p)), [timer.phase])
+
+  const doReset = () => {
+    setData((d) => ({ ...d, timer: reset(d.timer, d.settings) }))
+    setNow(Date.now())
+  }
+
   const todayStart = new Date().setHours(0, 0, 0, 0)
   const today = history.filter((h) => h.phase === 'focus' && h.completed && h.endedAt >= todayStart)
   const props: FaceProps = {
@@ -131,11 +141,9 @@ export default function App() {
     today: { count: today.length, min: Math.round(today.reduce((a, h) => a + h.endedAt - h.startedAt, 0) / 60_000) },
     streak: streak(history, now),
     onToggle: toggle,
-    onReset: () => {
-      setData((d) => ({ ...d, timer: reset(d.timer, d.settings) }))
-      setNow(Date.now())
-    },
-    onSkip: () => advance(false),
+    // Untouched phase: reset loses nothing, so no confirmation.
+    onReset: () => (running || left < total ? setPanel('reset') : doReset()),
+    onSkip: () => setPanel('skip'),
     onSwap: swapExercise,
     onSettings: () => setPanel('settings'),
     onStats: () => setPanel('stats'),
@@ -172,6 +180,28 @@ export default function App() {
       </main>
       <Stats open={panel === 'stats'} history={history} onClose={() => setPanel(null)} />
       <Hotkeys open={panel === 'help'} onClose={() => setPanel(null)} />
+      <Confirm
+        open={panel === 'reset'}
+        title="Сбросить таймер?"
+        text="Текущая фаза начнётся заново, прогресс будет потерян."
+        action="Сбросить"
+        onConfirm={() => {
+          setPanel(null)
+          doReset()
+        }}
+        onClose={() => setPanel(null)}
+      />
+      <Confirm
+        open={panel === 'skip'}
+        title="Перейти дальше?"
+        text={timer.phase === 'focus' ? 'Фокус-сессия закончится досрочно и не попадёт в статистику.' : 'Перерыв закончится, начнётся фокус.'}
+        action="Далее"
+        onConfirm={() => {
+          setPanel(null)
+          advance(false)
+        }}
+        onClose={() => setPanel(null)}
+      />
       <Settings
         open={panel === 'settings'}
         settings={settings}

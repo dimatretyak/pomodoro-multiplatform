@@ -14,7 +14,8 @@ export default function Panel({ open, title, side, onClose, children }: Props) {
   close.current = onClose
   useEffect(() => {
     if (!open) return
-    ref.current?.focus()
+    // Prefer an explicit target (e.g. the confirm button) over the dialog itself.
+    ;(ref.current?.querySelector<HTMLElement>('[data-autofocus]') ?? ref.current)?.focus()
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close.current()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)

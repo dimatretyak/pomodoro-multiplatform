@@ -97,7 +97,7 @@ button { cursor: pointer; }
 .ins-meta { margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px; align-items: center; text-align: center; font: 500 10.5px var(--mono); letter-spacing: 0.18em; color: var(--muted); font-variant-numeric: tabular-nums; }
 .ins-link { font: inherit; letter-spacing: inherit; color: var(--acc); border-bottom: 1px dashed currentColor; padding-bottom: 1px; }
 
-.ins-ctrl { margin-top: 44px; display: flex; align-items: center; gap: 34px; }
+.ins-ctrl { margin-top: 44px; display: flex; align-items: center; gap: clamp(10px, 5vw, 34px); }
 .ins-txt { font: 500 10.5px var(--mono); letter-spacing: 0.22em; color: var(--muted); padding: 10px 4px; }
 .ins-txt:hover { color: var(--fg); }
 .ins-play { width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; color: var(--on-acc); background: radial-gradient(circle at 35% 30%, var(--acc-hi), var(--acc) 60%); box-shadow: 0 0 0 6px var(--ring), 0 10px 40px -6px var(--acc), inset 0 -4px 10px #0004; }
@@ -105,11 +105,17 @@ button { cursor: pointer; }
 .ins-segs span { width: 26px; height: 3px; border-radius: 2px; background: var(--dim); transition: background 0.3s, box-shadow 0.3s; }
 .ins-segs span.on { background: var(--acc); box-shadow: 0 0 8px var(--acc); }
 .ins-segs span.cur { background: color-mix(in oklab, var(--acc) 40%, var(--dim)); }
-.ins-foot { margin-top: 18px; margin-bottom: auto; font: 400 10px var(--mono); letter-spacing: 0.16em; color: var(--faint); font-variant-numeric: tabular-nums; }
+.ins-foot { margin-top: 18px; margin-bottom: auto; text-align: center; font: 400 10px var(--mono); letter-spacing: 0.16em; color: var(--faint); font-variant-numeric: tabular-nums; }
 
 kbd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border: 1px solid var(--dim); border-bottom-width: 2px; border-radius: 6px; font: 500 10.5px var(--mono); letter-spacing: 0.04em; color: var(--fg); background: var(--well); }
 /* No keyboard on touch-only devices: hide the hotkeys button */
 @media (hover: none) and (pointer: coarse) { .ins-keys { display: none !important; } }
+.confirm-text { font-size: 14px; line-height: 1.5; color: var(--text); }
+.confirm-actions { display: flex; gap: 10px; margin-top: 22px; }
+.confirm-actions button { flex: 1; height: 44px; border-radius: 10px; font: 500 11px var(--mono); letter-spacing: 0.2em; text-transform: uppercase; }
+.confirm-cancel { border: 1px solid var(--dim); color: var(--muted); }
+.confirm-cancel:hover { color: var(--fg); border-color: var(--muted); }
+.confirm-ok { color: var(--on-acc); background: var(--acc); box-shadow: 0 8px 24px -8px var(--acc); }
 .keys { margin-top: 4px; }
 .keys-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 10px 0; border-bottom: 1px dashed var(--dash); }
 .keys-row dt { display: flex; align-items: center; gap: 6px; flex: none; }
