@@ -46,3 +46,10 @@ export const totalMin = (history: SessionRecord[]) =>
   history.reduce((a, h) => (h.phase === 'focus' && h.completed ? a + (h.endedAt - h.startedAt) / 60_000 : a), 0)
 
 
+
+/** Last 7 days vs the 7 before, from a 14-day series. pct is null when there is nothing to compare with. */
+export function weekCompare(days14: Day[]) {
+  const sum = (ds: Day[]) => ds.reduce((a, d) => a + d.min, 0)
+  const cur = sum(days14.slice(-7)), prev = sum(days14.slice(-14, -7))
+  return { cur, prev, pct: prev > 0 ? Math.round(((cur - prev) / prev) * 100) : null }
+}

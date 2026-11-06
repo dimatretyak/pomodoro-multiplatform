@@ -79,13 +79,13 @@ test('import: union history by id, newer settings win, junk rejected', () => {
   assert.throws(() => mergeImport(cur, { foo: 1 }))
 })
 
-test('import: out-of-range numbers, unknown theme/exercises dropped', () => {
+test('import: out-of-range numbers, unknown exercises dropped', () => {
   const cur = { settings: { ...defaultSettings, updatedAt: 0 }, timer: initialState(defaultSettings), history: [] }
-  const s = mergeImport(cur, { settings: { focusMin: -5, shortMin: 10, theme: 'neon', exercises: ['box', 'hack'], updatedAt: 1 }, history: [] }).data.settings
+  const s = mergeImport(cur, { settings: { focusMin: -5, shortMin: 10, accent: 'red;}', exercises: ['box', 'hack'], updatedAt: 1 }, history: [] }).data.settings
   assert.equal(s.focusMin, 25)
   assert.equal(s.shortMin, 10)
-  assert.equal(s.theme, 'system')
   assert.deepEqual(s.exercises, ['box'])
+  assert.equal(s.accent, '#ff6b35') // CSS injection attempt rejected
 })
 
 test('import retimes an untouched timer only', () => {
@@ -94,4 +94,12 @@ test('import retimes an untouched timer only', () => {
   assert.equal(mergeImport(cur, imp).data.timer.remaining, 40 * 60_000)
   const touched = { ...cur, timer: { ...cur.timer, remaining: 10 * 60_000 } }
   assert.equal(mergeImport(touched, imp).data.timer.remaining, 10 * 60_000)
+})
+
+import { weekCompare } from './stats.ts'
+
+test('week compare', () => {
+  const d = (min: number) => ({ start: 0, min, count: 0 })
+  assert.deepEqual(weekCompare([...Array(7).fill(d(10)), ...Array(7).fill(d(15))]), { cur: 105, prev: 70, pct: 50 })
+  assert.equal(weekCompare(Array(14).fill(d(0))).pct, null)
 })

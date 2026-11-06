@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { categories, exercises, type Category } from './exercises.ts'
 import type { Settings as S } from './timer.ts'
 import Panel from './Panel.tsx'
@@ -12,120 +12,131 @@ interface Props {
   onImport: (file: File) => Promise<string> // resolves to a status message
 }
 
+const ACCENTS = [
+  ['Апельсин', '#ff6b35'], ['Коралл', '#ff4d6d'], ['Янтарь', '#ffb020'], ['Лайм', '#b5e550'], ['Небо', '#4cc2ff'], ['Роза', '#ff7ad9'],
+] as const
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(v) || min))
 
 export default function Settings({ open, settings: s, onClose, onChange, onExport, onImport }: Props) {
   const [msg, setMsg] = useState('')
+  const custom = !ACCENTS.some(([, c]) => c === s.accent)
   const set = <K extends keyof S>(k: K, v: S[K]) => onChange({ ...s, [k]: v })
   const toggleEx = (id: string) =>
     set('exercises', s.exercises.includes(id) ? s.exercises.filter((x) => x !== id) : [...s.exercises, id])
 
   return (
     <Panel open={open} title="Настройки" side="right" onClose={onClose}>
-        <Section title="Длительность, минут">
-          <Num label="Фокус" value={s.focusMin} onChange={(v) => set('focusMin', clamp(v, 1, 180))} />
-          <Num label="Короткий перерыв" value={s.shortMin} onChange={(v) => set('shortMin', clamp(v, 1, 60))} />
-          <Num label="Длинный перерыв" value={s.longMin} onChange={(v) => set('longMin', clamp(v, 1, 90))} />
-          <Num label="Сессий до длинного перерыва" value={s.longEvery} onChange={(v) => set('longEvery', clamp(v, 1, 12))} />
-        </Section>
+      <Section no="00" title="Акцентный цвет">
+        <div className="swatches">
+          {ACCENTS.map(([name, c]) => (
+            <button key={c} className="swatch press" style={{ '--c': c } as React.CSSProperties} aria-label={name} title={name} aria-pressed={s.accent === c} onClick={() => set('accent', c)} />
+          ))}
+          <label className="swatch-custom press" title="Свой цвет" data-on={custom} style={{ '--c': s.accent } as React.CSSProperties}>
+            +
+            <input type="color" className="sr-only" aria-label="Свой цвет" value={s.accent} onChange={(e) => set('accent', e.currentTarget.value)} />
+          </label>
+        </div>
+      </Section>
 
-        <Section title="Тема">
-          <div className="grid grid-cols-3 gap-1 rounded-xl border border-(--line) bg-(--surface) p-1 text-sm">
-            {(['system', 'dark', 'light'] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => set('theme', t)}
-                className={`press rounded-lg py-1.5 ${s.theme === t ? 'bg-(--accent) font-medium text-[#0e0b0d]' : 'text-(--muted) hover:text-(--fg)'}`}
-              >
-                {{ system: 'Системная', dark: 'Тёмная', light: 'Светлая' }[t]}
-              </button>
-            ))}
-          </div>
-        </Section>
+      <Section no="01" title="Длительность">
+        <div className="set-group">
+          <Num label="Фокус, мин" value={s.focusMin} min={1} max={180} onChange={(v) => set('focusMin', v)} />
+          <Num label="Короткий перерыв" value={s.shortMin} min={1} max={60} onChange={(v) => set('shortMin', v)} />
+          <Num label="Длинный перерыв" value={s.longMin} min={1} max={90} onChange={(v) => set('longMin', v)} />
+          <Num label="Сессий до длинного" value={s.longEvery} min={1} max={12} onChange={(v) => set('longEvery', v)} />
+        </div>
+      </Section>
 
-        <Section title="Поведение">
-          <Check label="Автостарт перерывов" checked={s.autoStartBreaks} onChange={() => set('autoStartBreaks', !s.autoStartBreaks)} />
-          <Check label="Автостарт фокуса после перерыва" checked={s.autoStartFocus} onChange={() => set('autoStartFocus', !s.autoStartFocus)} />
-          <Check label="Звуковой сигнал" checked={s.sound} onChange={() => set('sound', !s.sound)} />
-        </Section>
+      <Section no="02" title="Поведение">
+        <div className="set-group">
+          <Switch label="Автостарт перерывов" on={s.autoStartBreaks} onChange={() => set('autoStartBreaks', !s.autoStartBreaks)} />
+          <Switch label="Автостарт фокуса" on={s.autoStartFocus} onChange={() => set('autoStartFocus', !s.autoStartFocus)} />
+          <Switch label="Звук" on={s.sound} onChange={() => set('sound', !s.sound)} />
+        </div>
+      </Section>
 
-        <Section title="Упражнения в перерывах">
-          <p className="-mt-1 mb-3 text-[13px] text-(--muted)">
-            Выбранные упражнения чередуются. Ничего не выбрано — обычный таймер отдыха.
-          </p>
-          {(Object.keys(categories) as Category[]).map((c) => (
-            <div key={c} className="mb-3">
-              <div className="mb-1 text-xs font-medium tracking-wider text-(--muted) uppercase">{categories[c]}</div>
+      <Section no="03" title="Упражнения">
+        <p className="set-note">Выбранные чередуются в перерывах. Ничего не выбрано — обычный отдых.</p>
+        {(Object.keys(categories) as Category[]).map((c) => (
+          <div key={c}>
+            <div className="set-sub">{categories[c]}</div>
+            <div className="chips">
               {exercises.filter((e) => e.category === c).map((e) => (
-                <Check key={e.id} label={e.title} checked={s.exercises.includes(e.id)} onChange={() => toggleEx(e.id)} />
+                <button key={e.id} className="chip press" aria-pressed={s.exercises.includes(e.id)} onClick={() => toggleEx(e.id)}>
+                  {e.title}
+                </button>
               ))}
             </div>
-          ))}
-        </Section>
-
-        <Section title="Данные">
-          <p className="-mt-1 mb-3 text-[13px] text-(--muted)">
-            Файл переносит историю и настройки на другое устройство. При импорте история объединяется.
-          </p>
-          <div className="flex gap-2">
-            <button onClick={onExport} className="press flex-1 rounded-xl border border-(--line) bg-(--surface) py-2 text-sm hover:border-(--line-2)">
-              Экспорт
-            </button>
-            <label className="press flex-1 cursor-pointer rounded-xl border border-(--line) bg-(--surface) py-2 text-center text-sm hover:border-(--line-2) has-focus-visible:border-(--accent)">
-              Импорт
-              <input
-                type="file"
-                accept="application/json,.json"
-                className="sr-only"
-                onChange={async (e) => {
-                  const f = e.currentTarget.files?.[0]
-                  e.currentTarget.value = ''
-                  if (f) setMsg(await onImport(f))
-                }}
-              />
-            </label>
           </div>
-          {msg && <p className="fade-up mt-2 text-[13px] text-(--muted)" role="status">{msg}</p>}
-        </Section>
+        ))}
+      </Section>
 
-        <p className="mt-6 text-xs leading-relaxed text-(--muted)">
-          Все данные хранятся только в этом браузере. Пробел — старт/пауза.
-        </p>
+      <Section no="04" title="Данные">
+        <p className="set-note">Файл переносит историю и настройки на другое устройство. При импорте история объединяется.</p>
+        <div className="seg">
+          <button onClick={onExport} className="press">Экспорт</button>
+          <label className="press seg-label">
+            Импорт
+            <input
+              type="file"
+              accept="application/json,.json"
+              className="sr-only"
+              onChange={async (e) => {
+                const f = e.currentTarget.files?.[0]
+                e.currentTarget.value = ''
+                if (f) setMsg(await onImport(f))
+              }}
+            />
+          </label>
+        </div>
+        {msg && <p className="set-note fade-up mt-2" role="status">{msg}</p>}
+      </Section>
+
+      <p className="set-note mt-6">Все данные хранятся только в этом браузере. Пробел — старт/пауза.</p>
     </Panel>
   )
 }
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ no, title, children }: { no: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="mb-6">
-      <h3 className="mb-3 text-sm font-medium text-(--fg)">{title}</h3>
-      {children}
+    <section className="set-sec">
+      <span className="set-no">{no}</span>
+      <div>
+        <h3 className="set-h">{title}</h3>
+        {children}
+      </div>
     </section>
   )
 }
 
-function Num({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+function Num({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void }) {
+  const commit = (v: number) => onChange(clamp(v, min, max))
   return (
-    <label className="flex items-center justify-between py-1.5 text-[15px]">
+    <div className="set-row">
       <span>{label}</span>
-      <input
-        type="number"
-        inputMode="numeric"
-        defaultValue={value}
-        key={value}
-        onBlur={(e) => onChange(e.currentTarget.valueAsNumber)}
-        onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-        className="w-20 rounded-lg border border-(--line) bg-(--surface) px-3 py-1.5 text-right tabular-nums outline-none focus:border-(--accent)"
-      />
-    </label>
+      <span className="stepper">
+        <button className="press" aria-label={`${label}: меньше`} onClick={() => commit(value - 1)} disabled={value <= min}>−</button>
+        <input
+          type="number"
+          inputMode="numeric"
+          aria-label={label}
+          defaultValue={value}
+          key={value}
+          onBlur={(e) => commit(e.currentTarget.valueAsNumber)}
+          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+        />
+        <button className="press" aria-label={`${label}: больше`} onClick={() => commit(value + 1)} disabled={value >= max}>+</button>
+      </span>
+    </div>
   )
 }
 
-function Check({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
+function Switch({ label, on, onChange }: { label: string; on: boolean; onChange: () => void }) {
+  const id = useId()
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-lg py-1.5 text-[15px] hover:text-(--fg)">
-      <input type="checkbox" checked={checked} onChange={onChange} className="size-4" />
-      <span>{label}</span>
-    </label>
+    <div className="set-row">
+      <span id={id}>{label}</span>
+      <button role="switch" aria-checked={on} aria-labelledby={id} onClick={onChange} className="switch press" />
+    </div>
   )
 }

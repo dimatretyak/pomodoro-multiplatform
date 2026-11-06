@@ -1,4 +1,4 @@
-import { lastDays, streak, totalMin } from './stats.ts'
+import { lastDays, streak, totalMin, weekCompare } from './stats.ts'
 import type { SessionRecord } from './storage.ts'
 import Panel from './Panel.tsx'
 
@@ -22,57 +22,43 @@ export default function Stats({ open, history, onClose }: Props) {
   const now = Date.now()
   const days = lastDays(history, now, 14)
   const today = days[days.length - 1]
-  const week = days.slice(-7)
-  const weekMin = week.reduce((a, d) => a + d.min, 0)
+  const week = weekCompare(days)
   const max = Math.max(...days.map((d) => d.min))
-  const maxIdx = days.findIndex((d) => d.min === max)
   const s = streak(history, now)
 
   return (
     <Panel open={open} title="Статистика" side="left" onClose={onClose}>
-      <div className="grid grid-cols-2 gap-2">
-        <Tile label="Сегодня" value={hm(today.min)} sub={`${today.count} ${sessionsWord(today.count)}`} />
-        <Tile label="За 7 дней" value={hm(weekMin)} sub={`${week.reduce((a, d) => a + d.count, 0)} ${sessionsWord(week.reduce((a, d) => a + d.count, 0))}`} />
-        <Tile label="Всего" value={hm(totalMin(history))} />
-        <Tile label="Серия" value={`${s} ${plural(s, ['день', 'дня', 'дней'])}`} sub="подряд с фокусом" />
+      <div className="st-hero">
+        <span>Фокус за 7 дней</span>
+        <b>{hm(week.cur)}</b>
+        {week.pct !== null && <em>{week.pct >= 0 ? '▲' : '▼'} {Math.abs(week.pct)}% к прошлой неделе</em>}
       </div>
 
-      <h3 className="mt-8 mb-4 text-sm font-medium">Фокус по дням, минут</h3>
       {max === 0 ? (
-        <p className="text-sm text-(--muted)">Завершите первую фокус-сессию, и здесь появится график.</p>
+        <p className="set-note mt-6">Завершите первую фокус-сессию, и здесь появится график.</p>
       ) : (
         <>
           {/* key on `open` replays the grow animation each time the panel opens */}
-          <div key={String(open)} className="flex h-44 items-end gap-1.5 border-b border-(--line) pt-6">
+          <div key={String(open)} className="st-chart" aria-label="Минуты фокуса за 14 дней">
             {days.map((d, i) => {
-              const isToday = i === days.length - 1
               const label = `${dayLabel(d.start)}: ${Math.round(d.min)} мин, ${d.count} ${sessionsWord(d.count)}`
               return (
-                <div key={d.start} tabIndex={0} aria-label={label} className="group relative flex h-full flex-1 items-end outline-none">
-                  {d.min > 0 ? (
-                    <div
-                      className="bar w-full rounded-t-[4px] bg-(--accent) group-hover:brightness-110 group-focus-visible:brightness-110"
-                      style={{ height: `${Math.max(3, (d.min / max) * 100)}%`, animationDelay: `${i * 25}ms`, opacity: isToday ? 1 : 0.75 }}
-                    >
-                      {i === maxIdx && (
-                        <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] text-(--muted) tabular-nums">{Math.round(d.min)}</span>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="h-[2px] w-full rounded-full bg-(--line)" />
-                  )}
-                  <div className="pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden -translate-x-1/2 rounded-lg border border-(--line) bg-(--panel) px-2.5 py-1.5 text-xs whitespace-nowrap shadow-lg backdrop-blur-xl group-hover:block group-focus-visible:block">
-                    <div className="text-(--muted)">{dayLabel(d.start)}</div>
-                    <div className="tabular-nums">{Math.round(d.min)} мин · {d.count} {sessionsWord(d.count)}</div>
+                <div key={d.start} tabIndex={0} aria-label={label} className={`st-col ${i === days.length - 1 ? 'today' : ''}`}>
+                  <div className="st-track" />
+                  <div className={`st-bar ${d.min ? '' : 'zero'}`} style={{ height: d.min ? `${Math.max(4, (d.min / max) * 100)}%` : undefined, animationDelay: `${i * 25}ms` }} />
+                  <div className="st-tip">
+                    <span>{dayLabel(d.start)}</span>
+                    {Math.round(d.min)} мин · {d.count} {sessionsWord(d.count)}
                   </div>
                 </div>
               )
             })}
           </div>
-          <div className="mt-1.5 flex gap-1.5">
-            {days.map((d, i) => (
-              <span key={d.start} className={`flex-1 text-center text-[10px] ${i === days.length - 1 ? 'font-semibold text-(--fg)' : 'text-(--muted)'}`}>
-                {new Date(d.start).toLocaleDateString('ru', { weekday: 'short' })}
+          <div className="st-days" aria-hidden>
+            {days.map((d) => (
+              <span key={d.start}>
+                <i className="wd">{new Date(d.start).toLocaleDateString('ru', { weekday: 'short' }).slice(0, 2)}</i>
+                <i className="num">{new Date(d.start).getDate()}</i>
               </span>
             ))}
           </div>
@@ -86,16 +72,12 @@ export default function Stats({ open, history, onClose }: Props) {
           </table>
         </>
       )}
-    </Panel>
-  )
-}
 
-function Tile({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="rounded-2xl border border-(--line) bg-(--surface) p-4">
-      <div className="text-xs text-(--muted)">{label}</div>
-      <div className="mt-1 text-xl font-semibold tabular-nums">{value}</div>
-      {sub && <div className="mt-0.5 text-xs text-(--muted)">{sub}</div>}
-    </div>
+      <div className="st-tiles">
+        <div>Сегодня<b>{hm(today.min)}</b><small>{today.count} {sessionsWord(today.count)}</small></div>
+        <div>Серия<b>{s} {plural(s, ['день', 'дня', 'дней'])}</b><small>подряд</small></div>
+        <div>Всего<b>{hm(totalMin(history))}</b><small>фокуса</small></div>
+      </div>
+    </Panel>
   )
 }

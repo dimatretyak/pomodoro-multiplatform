@@ -9,7 +9,7 @@ export interface Settings {
   autoStartFocus: boolean
   sound: boolean
   exercises: string[] // enabled exercise ids, may be empty
-  theme: 'system' | 'dark' | 'light'
+  accent: string // focus-phase color, #rrggbb
   updatedAt: number
 }
 
@@ -31,7 +31,7 @@ export const defaultSettings: Settings = {
   autoStartFocus: false,
   sound: true,
   exercises: ['box', 'rule-20', 'neck'],
-  theme: 'system',
+  accent: '#ff6b35',
   updatedAt: 0,
 }
 

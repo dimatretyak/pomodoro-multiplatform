@@ -1,15 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
-import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Phase, type Settings as S } from './timer.ts'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Settings as S } from './timer.ts'
 import { download, load, mergeImport, save, type SessionRecord } from './storage.ts'
-import { chime, notify, unlock } from './alerts.ts'
-import { byId } from './exercises.ts'
-import BreakView from './BreakView.tsx'
+import { chime, notify, tick, unlock } from './alerts.ts'
+import { byId, stepAt } from './exercises.ts'
+import { streak } from './stats.ts'
 import Settings from './Settings.tsx'
 import Stats, { sessionsWord } from './Stats.tsx'
-
-const labels: Record<Phase, string> = { focus: 'Фокус', short: 'Короткий перерыв', long: 'Длинный перерыв' }
-const R = 45
-const C = 2 * Math.PI * R
+import { phaseLabel, type FaceProps } from './face.tsx'
+import Instrument from './Instrument.tsx'
 
 export default function App() {
   const [data, setData] = useState(load)
@@ -27,17 +25,20 @@ export default function App() {
     document.documentElement.dataset.phase = timer.phase
   }, [timer.phase])
   useEffect(() => {
-    const mq = matchMedia('(prefers-color-scheme: light)')
-    const apply = () => {
-      document.documentElement.dataset.theme = settings.theme === 'system' ? (mq.matches ? 'light' : 'dark') : settings.theme
-      document.querySelector('meta[name=theme-color]')?.setAttribute('content', settings.theme === 'light' || (settings.theme === 'system' && mq.matches) ? '#f0e9e7' : '#0e0b0d')
-    }
-    apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
-  }, [settings.theme])
+    document.documentElement.style.setProperty('--focus', settings.accent)
+  }, [settings.accent])
+  // Soft tone on exercise step change (useful with eyes closed).
+  const elapsed = (total - left) / 1000
+  const at = exercise ? stepAt(exercise, elapsed) : null
+  const stepKey = exercise ? `${exercise.id}:${at?.index ?? 'done'}` : ''
+  const prevStep = useRef(stepKey)
   useEffect(() => {
-    document.title = running || left < total ? `${fmt(left)} · ${labels[timer.phase]}` : 'Pomidoro'
+    if (stepKey && prevStep.current !== stepKey && running && settings.sound) tick()
+    prevStep.current = stepKey
+  }, [stepKey, running, settings.sound])
+
+  useEffect(() => {
+    document.title = running || left < total ? `${fmt(left)} · ${phaseLabel[timer.phase]}` : 'Pomidoro'
   }, [left, running, total, timer.phase])
 
   const advance = useCallback((completed: boolean) => {
@@ -115,108 +116,35 @@ export default function App() {
 
   const todayStart = new Date().setHours(0, 0, 0, 0)
   const today = history.filter((h) => h.phase === 'focus' && h.completed && h.endedAt >= todayStart)
-  const todayMin = Math.round(today.reduce((a, h) => a + h.endedAt - h.startedAt, 0) / 60_000)
+  const props: FaceProps = {
+    phase: timer.phase,
+    left,
+    total,
+    running,
+    started: running || left < total,
+    done: timer.done,
+    longEvery: settings.longEvery,
+    exercise,
+    elapsed,
+    canSwap: settings.exercises.length > 1,
+    today: { count: today.length, min: Math.round(today.reduce((a, h) => a + h.endedAt - h.startedAt, 0) / 60_000) },
+    streak: streak(history, now),
+    onToggle: toggle,
+    onReset: () => {
+      setData((d) => ({ ...d, timer: reset(d.timer, d.settings) }))
+      setNow(Date.now())
+    },
+    onSkip: () => advance(false),
+    onSwap: swapExercise,
+    onSettings: () => setOpen(true),
+    onStats: () => setStatsOpen(true),
+  }
 
   return (
     <>
-    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-      <div className="blob absolute -top-1/4 -left-1/4 size-[60vmax] rounded-full" />
-      <div className="blob blob-2 absolute -right-1/4 -bottom-1/3 size-[55vmax] rounded-full" />
-    </div>
-    <main className="relative mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 py-10 select-none">
-      <button
-        onClick={() => setOpen(true)}
-        aria-label="Настройки"
-        className="press fixed top-4 right-4 grid size-11 place-items-center rounded-full text-(--muted) hover:bg-(--hover) hover:text-(--fg)"
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
-          <circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" />
-        </svg>
-      </button>
-
-      <button
-        onClick={() => setStatsOpen(true)}
-        aria-label="Статистика"
-        className="press fixed top-4 left-4 grid size-11 place-items-center rounded-full text-(--muted) hover:bg-(--hover) hover:text-(--fg)"
-      >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-          <path d="M5 20V12M10 20V6M15 20v-9M20 20V9" />
-        </svg>
-      </button>
-
-      <div key={`l-${timer.phase}`} className="fade-up mb-6 text-center">
-        <div className="text-sm font-medium tracking-[0.08em] text-(--accent) uppercase">{labels[timer.phase]}</div>
-        {exercise && <div className="mt-1 text-[13px] text-(--muted) tabular-nums">{exercise.title} · {fmt(left)}</div>}
-      </div>
-
-      <div key={`r-${timer.phase}`} className="ring-pulse relative aspect-square w-[clamp(280px,78vw,360px)]">
-        <div className={`glow absolute -inset-10 rounded-full ${running ? 'running' : ''}`} />
-        <svg viewBox="0 0 100 100" className="absolute inset-0 -rotate-90">
-          <circle cx="50" cy="50" r={R} fill="none" stroke="var(--track)" strokeWidth="2.6" />
-          <circle
-            className="ring-progress"
-            cx="50" cy="50" r={R} fill="none" stroke="var(--accent)" strokeWidth="2.6" strokeLinecap="round"
-            strokeDasharray={C} strokeDashoffset={C * (1 - left / total)}
-            style={{ filter: 'drop-shadow(0 0 1.5px var(--accent))' }}
-          />
-        </svg>
-        <div className="ring-head absolute inset-0" style={{ rotate: `${360 * (left / total)}deg` }}>
-          <span className={`absolute top-[5%] left-1/2 size-3 -translate-1/2 rounded-full bg-white shadow-[0_0_12px_2px_var(--accent)] ${running ? 'opacity-100' : 'opacity-60'}`} />
-        </div>
-        <div className="enter absolute inset-[9%] grid place-items-center text-center">
-          {exercise ? (
-            <BreakView exercise={exercise} elapsed={(total - left) / 1000} cue={running && settings.sound} />
-          ) : (
-            <div>
-              <div className="flex justify-center overflow-hidden text-[clamp(64px,17vw,96px)] leading-none font-light tracking-tight tabular-nums">
-                {[...fmt(left)].map((ch, i) => (
-                  <span key={`${i}${ch}`} className={ch === ':' ? 'pb-[0.08em]' : 'digit'}>{ch}</span>
-                ))}
-              </div>
-              <div className="mt-3 text-[13px] text-(--muted)">
-                {timer.phase === 'focus' ? `сессия ${timer.done + 1} из ${settings.longEvery}` : running ? 'отдохните' : 'нажмите старт'}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-10 flex items-center gap-4">
-        <IconButton label="Сброс" onClick={() => { setData((d) => ({ ...d, timer: reset(d.timer, d.settings) })); setNow(Date.now()) }}>
-          <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
-        </IconButton>
-        <button
-          onClick={toggle}
-          className="press h-14 min-w-40 rounded-full bg-(--accent) px-8 text-[15px] font-semibold text-[#0e0b0d] shadow-[0_8px_30px_-6px_var(--accent)] hover:brightness-110"
-        >
-          {running ? 'Пауза' : left < total ? 'Продолжить' : 'Старт'}
-        </button>
-        <IconButton label="Пропустить" onClick={() => advance(false)}>
-          <path d="M5 4l10 8-10 8z" /><path d="M19 5v14" />
-        </IconButton>
-      </div>
-
-      <div className="mt-6 flex gap-2.5" aria-label={`Сессий в цикле: ${timer.done} из ${settings.longEvery}`}>
-        {Array.from({ length: settings.longEvery }, (_, i) => (
-          <span
-            key={i}
-            className={`size-2 rounded-full transition-colors duration-300 ${
-              i < timer.done ? 'dot-done bg-(--accent)' : i === timer.done && timer.phase === 'focus' ? 'ring-1 ring-(--accent)' : 'bg-(--line)'
-            }`}
-          />
-        ))}
-      </div>
-
-      <div className="mt-8 h-10 text-center text-[13px] text-(--muted)">
-        {exercise && settings.exercises.length > 1 && (
-          <button onClick={swapExercise} className="press mb-2 block w-full underline-offset-4 hover:text-(--fg) hover:underline">
-            Другое упражнение
-          </button>
-        )}
-        {today.length > 0 && `Сегодня: ${today.length} ${sessionsWord(today.length)} · ${todayMin} мин`}
-      </div>
-
+      <main className="select-none">
+        <Instrument {...props} />
+      </main>
       <Stats open={statsOpen} history={history} onClose={() => setStatsOpen(false)} />
       <Settings
         open={open}
@@ -226,22 +154,6 @@ export default function App() {
         onExport={() => download(data)}
         onImport={importFile}
       />
-    </main>
     </>
-  )
-}
-
-function IconButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="press grid size-11 place-items-center rounded-full border border-(--line) bg-(--surface) text-(--muted) hover:border-(--line-2) hover:text-(--fg)"
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        {children}
-      </svg>
-    </button>
   )
 }

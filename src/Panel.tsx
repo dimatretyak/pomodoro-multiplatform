@@ -20,27 +20,13 @@ export default function Panel({ open, title, side, onClose, children }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [open])
 
-  const left = side === 'left'
   return (
-    <div className={`fixed inset-0 z-10 ${open ? '' : 'pointer-events-none'}`} aria-hidden={!open} inert={!open}>
-      <div
-        onClick={onClose}
-        className={`absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
-      />
-      <aside
-        ref={ref}
-        tabIndex={-1}
-        role="dialog"
-        aria-label={title}
-        className={`absolute inset-y-0 w-full max-w-[380px] overflow-y-auto border-(--line) bg-(--panel) p-6 outline-none backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
-          left ? 'left-0 border-r' : 'right-0 border-l'
-        } ${open ? 'translate-x-0' : left ? '-translate-x-full' : 'translate-x-full'}`}
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">{title}</h2>
-          <button onClick={onClose} aria-label="Закрыть" className="press grid size-9 place-items-center rounded-full text-(--muted) hover:bg-(--hover) hover:text-(--fg)">
-            ✕
-          </button>
+    <div className={`panel-root ${open ? 'open' : ''}`} data-side={side} aria-hidden={!open} inert={!open}>
+      <div className="panel-scrim" onClick={onClose} />
+      <aside ref={ref} tabIndex={-1} role="dialog" aria-label={title} className="panel">
+        <div className="panel-head">
+          <h2>{title}</h2>
+          <button onClick={onClose} aria-label="Закрыть" className="panel-x press">✕</button>
         </div>
         {children}
       </aside>
