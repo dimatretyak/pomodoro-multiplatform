@@ -90,10 +90,15 @@ export default function App() {
     })
 
   const todayStart = new Date().setHours(0, 0, 0, 0)
-  const today = history.filter((h) => h.phase === 'focus' && h.endedAt >= todayStart)
+  const today = history.filter((h) => h.phase === 'focus' && h.completed && h.endedAt >= todayStart)
   const todayMin = Math.round(today.reduce((a, h) => a + h.endedAt - h.startedAt, 0) / 60_000)
 
   return (
+    <>
+    <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+      <div className="blob absolute -top-1/4 -left-1/4 size-[60vmax] rounded-full" />
+      <div className="blob blob-2 absolute -right-1/4 -bottom-1/3 size-[55vmax] rounded-full" />
+    </div>
     <main className="relative mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-6 py-10 select-none">
       <button
         onClick={() => setOpen(true)}
@@ -108,7 +113,7 @@ export default function App() {
 
       <div key={`l-${timer.phase}`} className="fade-up mb-6 text-center">
         <div className="text-sm font-medium tracking-[0.08em] text-(--accent) uppercase">{labels[timer.phase]}</div>
-        {exercise && <div className="mt-1 text-[13px] text-(--muted) tabular-nums">{fmt(left)} до конца перерыва</div>}
+        {exercise && <div className="mt-1 text-[13px] text-(--muted) tabular-nums">{exercise.title} · {fmt(left)}</div>}
       </div>
 
       <div key={`r-${timer.phase}`} className="ring-pulse relative aspect-square w-[clamp(280px,78vw,360px)]">
@@ -119,14 +124,22 @@ export default function App() {
             className="ring-progress"
             cx="50" cy="50" r={R} fill="none" stroke="var(--accent)" strokeWidth="2.6" strokeLinecap="round"
             strokeDasharray={C} strokeDashoffset={C * (1 - left / total)}
+            style={{ filter: 'drop-shadow(0 0 1.5px var(--accent))' }}
           />
         </svg>
+        <div className="ring-head absolute inset-0" style={{ rotate: `${360 * (left / total)}deg` }}>
+          <span className={`absolute top-[5%] left-1/2 size-3 -translate-1/2 rounded-full bg-white shadow-[0_0_12px_2px_var(--accent)] ${running ? 'opacity-100' : 'opacity-60'}`} />
+        </div>
         <div className="enter absolute inset-[9%] grid place-items-center text-center">
           {exercise ? (
             <BreakView exercise={exercise} elapsed={(total - left) / 1000} />
           ) : (
             <div>
-              <div className="text-[clamp(64px,17vw,96px)] leading-none font-light tracking-tight tabular-nums">{fmt(left)}</div>
+              <div className="flex justify-center overflow-hidden text-[clamp(64px,17vw,96px)] leading-none font-light tracking-tight tabular-nums">
+                {[...fmt(left)].map((ch, i) => (
+                  <span key={`${i}${ch}`} className={ch === ':' ? 'pb-[0.08em]' : 'digit'}>{ch}</span>
+                ))}
+              </div>
               <div className="mt-3 text-[13px] text-(--muted)">
                 {timer.phase === 'focus' ? `сессия ${timer.done + 1} из ${settings.longEvery}` : running ? 'отдохните' : 'нажмите старт'}
               </div>
@@ -172,6 +185,7 @@ export default function App() {
 
       <Settings open={open} settings={settings} onClose={() => setOpen(false)} onChange={saveSettings} />
     </main>
+    </>
   )
 }
 

@@ -13,12 +13,11 @@ export default function BreakView({ exercise, elapsed }: { exercise: Exercise; e
       <div className="relative grid size-full place-items-center">
         <div
           className="breath absolute inset-[8%] rounded-full border-2 border-(--accent) bg-(--accent)/15"
-          style={{ transform: `scale(${big ? 1 : 0.55})`, transitionDuration: `${step.sec}s` }}
+          style={{ scale: big ? 1 : 0.55, transitionDuration: `${step.sec}s` }}
         />
         <div className="relative">
           <div key={at!.index} className="fade-up text-2xl font-medium">{step.text}</div>
           <div className="mt-1 text-4xl font-light tabular-nums">{left}</div>
-          <div className="mt-2 text-xs text-(--muted)">{exercise.title}</div>
         </div>
       </div>
     )
@@ -36,7 +35,7 @@ export default function BreakView({ exercise, elapsed }: { exercise: Exercise; e
   return (
     <div className="flex flex-col items-center px-2">
       <div className="text-xs text-(--muted)">
-        {exercise.title} · шаг {at!.index + 1} из {exercise.steps.length}
+        шаг {at!.index + 1} из {exercise.steps.length}
       </div>
       <div key={at!.index} className="fade-up mt-3 max-w-[24ch] text-lg leading-snug">{step.text}</div>
       <div className="mt-4 text-5xl font-light tabular-nums">{left}</div>

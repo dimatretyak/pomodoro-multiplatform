@@ -34,20 +34,28 @@ body {
 .press:active { transform: scale(0.96); }
 
 .ring-progress { transition: stroke-dashoffset 0.3s linear; }
+.ring-head { transition: rotate 0.3s linear; }
+.blob { background: radial-gradient(circle, color-mix(in oklab, var(--accent) 9%, transparent), transparent 60%); }
 
 @media (prefers-reduced-motion: no-preference) {
   .glow.running { animation: glow 6s ease-in-out infinite; }
   .enter { animation: enter 0.6s cubic-bezier(0.2, 0, 0, 1) both; }
   .dot-done { animation: pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .ring-pulse { animation: pulse 0.6s ease-out; }
-  .breath { transition-property: transform; transition-timing-function: ease-in-out; }
+  .breath { transition-property: scale; transition-timing-function: ease-in-out; }
+  @starting-style { .breath { scale: 0.55 !important; } }
   .fade-up { animation: fade-up 0.4s ease-out both; }
+  .digit { display: inline-block; animation: digit 0.35s cubic-bezier(0.2, 0, 0, 1) both; }
+  .blob { animation: drift 28s ease-in-out infinite alternate; }
+  .blob-2 { animation-duration: 36s; animation-direction: alternate-reverse; }
 }
 
 @keyframes glow { 0%, 100% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.12); opacity: 1; } }
 @keyframes enter { from { opacity: 0; transform: scale(0.94); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
 @keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
 @keyframes pulse { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes digit { from { opacity: 0; transform: translateY(-35%); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(18vmax, 12vmax) scale(1.15); } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 input[type='checkbox'] { accent-color: var(--accent); }
