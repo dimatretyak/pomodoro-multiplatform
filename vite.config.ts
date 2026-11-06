@@ -8,4 +8,4 @@ const https = process.env.HTTPS
   ? { key: readFileSync('.cert/key.pem'), cert: readFileSync('.cert/cert.pem') }
   : undefined
 
-export default defineConfig({ plugins: [react(), tailwindcss()], server: { https }, preview: { https } })
+export default defineConfig({ base: './', plugins: [react(), tailwindcss()], server: { https }, preview: { https } })

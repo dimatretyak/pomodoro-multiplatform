@@ -1,7 +1,8 @@
 // Offline support. Pages: network first (picks up new deploys), cached copy offline.
 // Hashed assets: cache first. Bump CACHE to drop old caches.
-const CACHE = 'pomidoro-v1'
-const CORE = ['/', '/icon.svg', '/manifest.webmanifest']
+// Paths are relative to this file, so the app works under any subpath (e.g. GitHub Pages /<repo>/).
+const CACHE = 'pomidoro-v2'
+const CORE = ['./', './icon.svg', './manifest.webmanifest']
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
@@ -9,8 +10,8 @@ self.addEventListener('install', (e) => {
       const c = await caches.open(CACHE)
       await c.addAll(CORE)
       // Precache the bundle the current index.html points to, so offline works after the first visit.
-      const html = await (await c.match('/')).text()
-      await c.addAll([...new Set(html.match(/\/assets\/[^"']+/g) ?? [])])
+      const html = await (await c.match('./')).text()
+      await c.addAll([...new Set(html.match(/assets\/[^"']+/g) ?? [])])
       await self.skipWaiting()
     })(),
   )
@@ -33,11 +34,11 @@ self.addEventListener('fetch', (e) => {
         .then((res) => {
           if (res.ok) {
             const copy = res.clone()
-            caches.open(CACHE).then((c) => c.put('/', copy))
+            caches.open(CACHE).then((c) => c.put('./', copy))
           }
           return res
         })
-        .catch(() => caches.match('/')),
+        .catch(() => caches.match('./')),
     )
     return
   }
@@ -60,6 +61,6 @@ self.addEventListener('notificationclick', (e) => {
   e.notification.close()
   e.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((cs) => (cs[0] ? cs[0].focus() : self.clients.openWindow('/'))),
+      .then((cs) => (cs[0] ? cs[0].focus() : self.clients.openWindow('./'))),
   )
 })

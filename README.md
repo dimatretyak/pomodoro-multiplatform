@@ -1,100 +1,108 @@
 # Pomidoro
 
-Локальный pomodoro-таймер с упражнениями в перерывах: дыхание, глаза, спина и шея.
-Без сервера и сети: всё хранится в `localStorage` браузера (ключ `pomidoro:v1`).
+**English** | [Русский](README.ru.md)
 
-## Запуск
+A local Pomodoro timer with exercises during breaks: breathing, eyes, back and neck.
+No server and no network: everything is stored in the browser's `localStorage` (key `pomidoro:v1`).
+
+## Getting started
 
 ```sh
 npm install
 npm run dev      # http://localhost:5173
-npm test         # node --test: логика таймера и упражнений
+npm test         # node --test: timer and exercise logic
 npm run build    # tsc + vite build → dist/
 ```
 
-## Проверка на телефоне в локальной сети
+## Deploying to GitHub Pages
+
+The `.github/workflows/pages.yml` workflow runs the tests, builds `dist/` and publishes it on every push to `main`.
+One-time setup: Settings → Pages → Source: **GitHub Actions**. The site will be available at
+`https://<user>.github.io/<repo>/`. The build uses relative paths (`base: './'`), so it works both
+from a subpath and on a custom domain.
+
+## Testing on a phone over the local network
 
 ```sh
-npm run cert            # самоподписанный сертификат в .cert/ (IP Mac из en0), сменился IP: запустить снова
-npm run dev:https       # dev по https://<IP>:5173
-npm run preview:https   # production-сборка (с офлайном) по https://<IP>:4173
+npm run cert            # self-signed certificate in .cert/ (Mac IP from en0); rerun if the IP changes
+npm run dev:https       # dev server at https://<IP>:5173
+npm run preview:https   # production build (with offline support) at https://<IP>:4173
 ```
 
-Браузер предупредит о сертификате, это нормально. Таймер работает и после «всё равно открыть».
-Для уведомлений и офлайна сертификату нужно доверять:
+The browser will warn about the certificate; that's expected. The timer works after "proceed anyway".
+Notifications and offline mode require the certificate to be trusted:
 
-- iPhone: передать `.cert/cert.pem` (AirDrop) → Настройки → «Профиль загружен» → Установить →
-  Основные → Об этом устройстве → Доверие сертификатам → включить `pomidoro-dev`.
-  Уведомления на iOS работают только из установленного приложения («На экран Домой»).
-- Android: Настройки → Безопасность → Шифрование и учётные данные → Установить сертификат → CA.
+- iPhone: send `.cert/cert.pem` (AirDrop) → Settings → "Profile Downloaded" → Install →
+  General → About → Certificate Trust Settings → enable `pomidoro-dev`.
+  On iOS, notifications only work from the installed app ("Add to Home Screen").
+- Android: Settings → Security → Encryption & credentials → Install a certificate → CA certificate.
 
-**Безопасность.** Сертификат — корневой (CA). Тот, у кого есть `.cert/key.pem`, может выпускать сертификаты,
-которым будет доверять телефон. `nameConstraints` ограничивает их localhost и IP Mac, но не все платформы
-это ограничение соблюдают. Поэтому ключ никому не передавать (он в `.gitignore`), срок сертификата 30 дней,
-после проверки удалить профиль с телефона.
+**Security.** The certificate is a root (CA) certificate. Anyone with `.cert/key.pem` can issue certificates
+that the phone will trust. `nameConstraints` limits them to localhost and the Mac's IP, but not every platform
+enforces that constraint. So never share the key (it's in `.gitignore`); the certificate is valid for 30 days;
+remove the profile from the phone once you're done testing.
 
-## Что есть
+## Features
 
-- Фокус → короткий перерыв ×N → длинный перерыв. Таймер считает от временных меток,
-  поэтому переживает перезагрузку вкладки и не отстаёт в фоне.
-- Звук (Web Audio, без файлов), системное уведомление (если разрешено), время в заголовке вкладки.
-  По желанию тиканье часов во время фокуса.
-- Фоновый звук во время фокуса: дождь, волны, лес, камин, шум. Синтезируется в браузере
-  (`src/ambient.ts`), файлов нет, работает офлайн. Громкость в настройках.
-- Упражнения выбираются в настройках: можно несколько или ни одного. Выбранные чередуются
-  от перерыва к перерыву, кнопка «Другое упражнение» переключает текущее.
-- Поле «Над чем работаем?»: задача прикрепляется к каждой завершённой фокус-сессии, недавние задачи
-  подсказываются при вводе.
-- Календарь: насыщенность дня = минуты фокуса; по клику на день список сессий и разбивка по задачам.
-  Фокус-сессию можно открыть и дописать или исправить задачу. Правка ставит `updatedAt`,
-  и при импорте побеждает более свежая версия записи.
-- Статистика (кнопка слева сверху): сегодня, 7 дней, всего, серия дней, график фокуса за 14 дней.
-- Дизайн «Инструмент»: шкала из 60 рисок, зерно, моноширинные подписи. В настройках 14 палитр и вариант «Свои цвета»,
-  каждая задаёт цвета фокуса, короткого и длинного перерыва (цвета в `src/index.css`, `[data-palette]`).
-- Тёмная, светлая и автоматическая (по системе) тема.
-- 9 языков: русский, английский, испанский, немецкий, французский, португальский, итальянский,
-  китайский, японский. По умолчанию язык браузера, переключатель в настройках.
-  Русский и английский записаны прямо в коде: `t('по-русски', 'in English')`. Остальные языки лежат
-  в `src/locales/*.ts`, ключ — английская строка. Тест проверяет, что каждый словарь переводит
-  каждую строку интерфейса, поэтому новая строка без перевода не пройдёт `npm test`.
-- Экспорт и импорт JSON в настройках. Импорт объединяет историю по `id`, настройки берутся
-  более свежие. Так можно вручную перенести данные на другое устройство.
-- Офлайн: service worker (только в production-сборке) кеширует приложение при первом визите.
-  `manifest.webmanifest` позволяет установить его как приложение (на iOS: «На экран Домой»).
-- Горячие клавиши (работают на любой раскладке): пробел — старт/пауза, R — сброс, N или → — далее,
-  E — другое упражнение, T — задача, A — статистика, C — календарь, S — настройки, ? — справка, Esc — закрыть.
-  Сброс начатой фазы и «Далее» спрашивают подтверждение: Y / Enter — да, N / Esc — нет.
+- Focus → short break ×N → long break. The timer counts from timestamps,
+  so it survives a tab reload and doesn't fall behind in the background.
+- Sound (Web Audio, no files), system notification (if allowed), time in the tab title.
+  Optional clock ticking during focus.
+- Background sound during focus: rain, waves, forest, fireplace, noise. Synthesized in the browser
+  (`src/ambient.ts`), no files, works offline. Volume in settings.
+- Exercises are chosen in settings: several or none. The selected ones rotate
+  from break to break; the "Another exercise" button switches the current one.
+- "What are you working on?" field: the task is attached to each completed focus session, recent tasks
+  are suggested as you type.
+- Calendar: day intensity = focus minutes; clicking a day shows its sessions and a per-task breakdown.
+  A focus session can be opened to add or fix its task. Editing sets `updatedAt`,
+  and on import the newer version of a record wins.
+- Statistics (top-left button): today, 7 days, all time, day streak, 14-day focus chart.
+- "Instrument" design: a 60-tick dial, grain, monospaced labels. Settings offer 14 palettes plus "Custom colors",
+  each defining the colors for focus, short break and long break (colors in `src/index.css`, `[data-palette]`).
+- Dark, light and automatic (system) theme.
+- 9 languages: Russian, English, Spanish, German, French, Portuguese, Italian,
+  Chinese, Japanese. Defaults to the browser language, switchable in settings.
+  Russian and English are written inline in the code: `t('по-русски', 'in English')`. The other languages live
+  in `src/locales/*.ts`, keyed by the English string. A test checks that every dictionary translates
+  every UI string, so a new string without a translation fails `npm test`.
+- JSON export and import in settings. Import merges history by `id` and keeps the newer
+  settings. This lets you move data to another device by hand.
+- Offline: a service worker (production build only) caches the app on the first visit.
+  `manifest.webmanifest` makes it installable as an app (on iOS: "Add to Home Screen").
+- Keyboard shortcuts (work with any keyboard layout): Space — start/pause, R — reset, N or → — next,
+  E — another exercise, T — task, A — statistics, C — calendar, S — settings, ? — help, Esc — close.
+  Resetting a started phase and "Next" ask for confirmation: Y / Enter — yes, N / Esc — no.
 
-## Структура
+## Structure
 
-| Файл | Что внутри |
+| File | Contents |
 |---|---|
-| `src/timer.ts` | чистая логика фаз: start/pause/next/reset |
-| `src/exercises.ts` | данные упражнений, `stepAt()` |
-| `src/storage.ts` | localStorage, экспорт, импорт с валидацией |
-| `src/stats.ts`, `Stats.tsx`, `Calendar.tsx` | агрегаты по дням, серия, статистика, календарь |
-| `public/sw.js` | офлайн-кеш, клик по уведомлению |
-| `src/alerts.ts` | звук и уведомления |
-| `src/App.tsx` | состояние и эффекты таймера |
-| `src/Instrument.tsx`, `face.tsx` | главный экран и общие хелперы |
-| `src/Settings.tsx`, `Panel.tsx` | UI настроек и панелей |
-| `design/variants.html` | макеты трёх рассмотренных направлений |
+| `src/timer.ts` | pure phase logic: start/pause/next/reset |
+| `src/exercises.ts` | exercise data, `stepAt()` |
+| `src/storage.ts` | localStorage, export, import with validation |
+| `src/stats.ts`, `Stats.tsx`, `Calendar.tsx` | per-day aggregates, streak, statistics, calendar |
+| `public/sw.js` | offline cache, notification click |
+| `src/alerts.ts` | sound and notifications |
+| `src/App.tsx` | timer state and effects |
+| `src/Instrument.tsx`, `face.tsx` | main screen and shared helpers |
+| `src/Settings.tsx`, `Panel.tsx` | settings and panel UI |
 
-## Синхронизация между устройствами
+## Syncing between devices
 
-У браузеров нет встроенного API, который синхронизирует данные веб-приложения между устройствами
-(`chrome.storage.sync` доступен только расширениям). Варианты на будущее:
+Browsers have no built-in API that syncs web app data between devices
+(`chrome.storage.sync` is only available to extensions). Options for the future:
 
-1. Экспорт/импорт JSON вручную: уже есть в настройках.
-2. Local-first синхронизация через сервер: Dexie Cloud, PouchDB + CouchDB, Yjs/Automerge с relay-сервером.
-3. Свой бэкенд с аккаунтами. Понадобится для фич в духе Toggl: проекты, теги, ставки.
+1. Manual JSON export/import: already available in settings.
+2. Local-first sync via a server: Dexie Cloud, PouchDB + CouchDB, Yjs/Automerge with a relay server.
+3. A custom backend with accounts. Needed for Toggl-style features: projects, tags, rates.
 
-Записи истории уже хранятся как JSON с `id` и метками времени, а у настроек есть `updatedAt`,
-так что будущая синхронизация сведётся к слиянию записей, без переписывания хранилища.
+History records are already stored as JSON with an `id` and timestamps, and settings have `updatedAt`,
+so future sync comes down to merging records, without rewriting the storage.
 
-## Ограничения
+## Limitations
 
-- Если вкладка закрыта, сигнал не прозвучит: веб-страница не умеет будить себя сама.
-  Сработает при следующем открытии.
-- Кеш ассетов растёт с каждым деплоем (старые хеши не удаляются). Чтобы очистить,
-  увеличьте `CACHE` в `public/sw.js`.
+- If the tab is closed, the alert won't sound: a web page can't wake itself up.
+  It fires the next time the app is opened.
+- The asset cache grows with each deploy (old hashes aren't removed). To clear it,
+  bump `CACHE` in `public/sw.js`.
