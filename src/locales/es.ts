@@ -167,4 +167,12 @@ export default {
   "Save": "Guardar",
   "Edit": "Editar",
   "Custom": "Personalizada",
+  "Background sound": "Sonido de fondo",
+  "Off": "Apagado",
+  "Rain": "Lluvia",
+  "Waves": "Olas",
+  "Fireplace": "Chimenea",
+  "Noise": "Ruido",
+  "Volume": "Volumen",
+  "Plays during focus.": "Suena durante el enfoque.",
 } satisfies Record<string, string>

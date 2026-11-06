@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { duration, fmt, next, pause, remainingMs, reset, retime, start, type Settings as S } from './timer.ts'
 import { download, editRecord, load, mergeImport, save, TASK_MAX, type SessionRecord } from './storage.ts'
 import { chime, clockTick, notify, tick, unlock } from './alerts.ts'
+import { setAmbient } from './ambient.ts'
 import { byId, stepAt } from './exercises.ts'
 import { recentTasks, streak } from './stats.ts'
 import { sessionsWord, setLang, t } from './i18n.ts'
@@ -118,6 +119,19 @@ export default function App() {
       clearInterval(id)
     }
   }, [ticking, timer.endAt])
+
+  // Background sound: plays while focus runs, or briefly as a preview after a change in settings.
+  const [previewUntil, setPreviewUntil] = useState(0)
+  const previewing = previewUntil > now
+  const ambientOn = settings.ambient !== 'off' && ((running && timer.phase === 'focus') || previewing)
+  useEffect(() => {
+    setAmbient(ambientOn ? settings.ambient : 'off', settings.ambientVolume)
+  }, [ambientOn, settings.ambient, settings.ambientVolume])
+  useEffect(() => {
+    if (!previewing) return
+    const id = setTimeout(() => setNow(Date.now()), previewUntil - Date.now() + 20) // re-render to end the preview
+    return () => clearTimeout(id)
+  }, [previewing, previewUntil])
 
   const toggle = useCallback(() => {
     unlock()
@@ -254,6 +268,12 @@ export default function App() {
         settings={settings}
         onClose={() => setPanel(null)}
         onChange={saveSettings}
+        onPreviewAmbient={() => {
+          unlock()
+          const until = Date.now() + 5000
+          setPreviewUntil(until)
+          setNow(Date.now())
+        }}
         onExport={() => download(data)}
         onImport={importFile}
       />

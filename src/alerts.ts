@@ -1,4 +1,6 @@
 let ctx: AudioContext | null = null
+/** Shared context (also used by ambient.ts); created lazily, unlocked by unlock() on a user gesture. */
+export const audio = () => (ctx ??= new AudioContext())
 
 /** Soft single tone: exercise step changed (useful with eyes closed). */
 export const tick = () => tones([523], 0.12, 0.6)

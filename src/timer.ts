@@ -1,6 +1,7 @@
 export type Phase = 'focus' | 'short' | 'long'
 // Colors live in index.css under [data-palette=…]; this is the list of ids and names.
 import { browserLang, type L, type Lang } from './i18n.ts'
+import type { Ambient } from './ambient.ts'
 export const palettes = {
   classic: ['Классика', 'Classic'], ocean: ['Океан', 'Ocean'], sunset: ['Закат', 'Sunset'], forest: ['Лес', 'Forest'],
   neon: ['Неон', 'Neon'], amber: ['Янтарь', 'Amber'], mono: ['Монохром', 'Mono'],
@@ -21,6 +22,8 @@ export interface Settings {
   autoStartFocus: boolean
   sound: boolean
   ticking: boolean // clock ticking during focus, needs `sound`
+  ambient: Ambient // background sound during focus
+  ambientVolume: number // 0..100
   exercises: string[] // enabled exercise ids, may be empty
   palette: Palette
   customColors: CustomColors
@@ -47,6 +50,8 @@ export const defaultSettings: Settings = {
   autoStartFocus: false,
   sound: true,
   ticking: false,
+  ambient: 'off',
+  ambientVolume: 40,
   exercises: ['box', 'rule-20', 'neck'],
   palette: 'classic',
   customColors: { focus: '#ff6b35', short: '#5ee0b8', long: '#9d8cff' },

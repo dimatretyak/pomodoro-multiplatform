@@ -200,6 +200,13 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; 
 .langs { grid-template-columns: repeat(3, 1fr); }
 .langs .pal { justify-content: center; padding: 10px 4px; }
 .palettes .pal[data-palette='custom'] { grid-column: 1 / -1; justify-content: center; }
+.range { display: flex; align-items: center; gap: 12px; }
+.range b { width: 28px; text-align: right; font: 400 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.range input { width: 150px; height: 18px; background: none; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.range input::-webkit-slider-runnable-track { height: 3px; border-radius: 2px; background: linear-gradient(to right, var(--acc) var(--v), var(--dim) var(--v)); }
+.range input::-moz-range-track { height: 3px; border-radius: 2px; background: linear-gradient(to right, var(--acc) var(--v), var(--dim) var(--v)); }
+.range input::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5.5px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 8px var(--acc); }
+.range input::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: var(--acc); box-shadow: 0 0 8px var(--acc); }
 .custom-colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
 .custom-color { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 6px 10px; border: 1px dashed var(--dim); border-radius: 10px; cursor: pointer; text-align: center; }
 .custom-color:hover { border-color: var(--muted); }

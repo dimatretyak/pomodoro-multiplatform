@@ -167,4 +167,12 @@ export default {
   "Save": "保存",
   "Edit": "编辑",
   "Custom": "自定义",
+  "Background sound": "背景音",
+  "Off": "关闭",
+  "Rain": "雨声",
+  "Waves": "海浪",
+  "Fireplace": "壁炉",
+  "Noise": "噪音",
+  "Volume": "音量",
+  "Plays during focus.": "专注时播放。",
 } satisfies Record<string, string>

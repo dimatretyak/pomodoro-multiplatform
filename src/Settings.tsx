@@ -3,6 +3,7 @@ import { categories, exercises, type Category } from './exercises.ts'
 import { palettes, type Palette, type Settings as S } from './timer.ts'
 import Panel from './Panel.tsx'
 import { langNames, langs, t, tr } from './i18n.ts'
+import { ambientKinds } from './ambient.ts'
 
 interface Props {
   open: boolean
@@ -11,11 +12,12 @@ interface Props {
   onChange: (s: S) => void
   onExport: () => void
   onImport: (file: File) => Promise<string> // resolves to a status message
+  onPreviewAmbient: () => void
 }
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(v) || min))
 
-export default function Settings({ open, settings: s, onClose, onChange, onExport, onImport }: Props) {
+export default function Settings({ open, settings: s, onClose, onChange, onExport, onImport, onPreviewAmbient }: Props) {
   const [msg, setMsg] = useState('')
   const set = <K extends keyof S>(k: K, v: S[K]) => onChange({ ...s, [k]: v })
   const toggleEx = (id: string) =>
@@ -99,6 +101,46 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
             </div>
           )}
         </div>
+      </Section>
+
+      <Section no="02" title={t('Фоновый звук', 'Background sound')}>
+        <div className="palettes langs">
+          {ambientKinds.map((k) => (
+            <button
+              key={k}
+              className="pal press"
+              aria-pressed={s.ambient === k}
+              onClick={() => {
+                set('ambient', k)
+                if (k !== 'off') onPreviewAmbient()
+              }}
+            >
+              {{ off: t('Выкл', 'Off'), rain: t('Дождь', 'Rain'), waves: t('Волны', 'Waves'), forest: t('Лес', 'Forest'), fire: t('Камин', 'Fireplace'), brown: t('Шум', 'Noise') }[k]}
+            </button>
+          ))}
+        </div>
+        {s.ambient !== 'off' && (
+          <div className="set-row fade-up">
+            <span>{t('Громкость', 'Volume')}</span>
+            <span className="range">
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={s.ambientVolume}
+                aria-label={t('Громкость', 'Volume')}
+                onChange={(e) => {
+                  set('ambientVolume', e.currentTarget.valueAsNumber)
+                  onPreviewAmbient()
+                }}
+                style={{ '--v': `${s.ambientVolume}%` } as React.CSSProperties}
+              />
+              <b>{s.ambientVolume}</b>
+            </span>
+          </div>
+        )}
+        <p className="set-note mt-2">{t('Играет во время фокуса.', 'Plays during focus.')}</p>
       </Section>
 
       <Section no="03" title={t('Упражнения', 'Exercises')}>

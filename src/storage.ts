@@ -1,4 +1,5 @@
 import { exercises } from './exercises.ts'
+import { ambientKinds } from './ambient.ts'
 import { langs, t } from './i18n.ts'
 import { defaultSettings, initialState, isHex, palettes, retime, type Phase, type Settings, type TimerState } from './timer.ts'
 
@@ -58,6 +59,8 @@ function cleanSettings(raw: any): Partial<Settings> {
     if (k === 'exercises') out[k] = Array.isArray(v) ? v.filter((id) => exercises.some((e) => e.id === id)) : def
     else if (k === 'lang') out[k] = langs.includes(v) ? v : def
     else if (k === 'theme') out[k] = ['system', 'dark', 'light'].includes(v) ? v : def
+    else if (k === 'ambient') out[k] = (ambientKinds as readonly string[]).includes(v) ? v : def
+    else if (k === 'ambientVolume') out[k] = Number.isInteger(v) && v >= 0 && v <= 100 ? v : def
     else if (k === 'palette') out[k] = Object.hasOwn(palettes, v) ? v : def
     else if (k === 'customColors') {
       const d = def as Settings['customColors']

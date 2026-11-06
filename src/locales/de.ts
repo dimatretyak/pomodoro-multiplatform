@@ -167,4 +167,12 @@ export default {
   "Save": "Speichern",
   "Edit": "Bearbeiten",
   "Custom": "Eigene Farben",
+  "Background sound": "Hintergrundklang",
+  "Off": "Aus",
+  "Rain": "Regen",
+  "Waves": "Wellen",
+  "Fireplace": "Kamin",
+  "Noise": "Rauschen",
+  "Volume": "Lautstärke",
+  "Plays during focus.": "Läuft während des Fokus.",
 } satisfies Record<string, string>

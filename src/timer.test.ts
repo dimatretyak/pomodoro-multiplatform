@@ -199,3 +199,13 @@ test('custom palette colors are validated on import', () => {
   assert.equal(s.palette, 'custom')
   assert.deepEqual(s.customColors, { focus: '#123abc', short: defaultSettings.customColors.short, long: defaultSettings.customColors.long })
 })
+
+test('ambient settings are validated on import', () => {
+  const cur = { settings: { ...defaultSettings, updatedAt: 0 }, timer: initialState(defaultSettings), history: [], task: '' }
+  const ok = mergeImport(cur, { history: [], settings: { ambient: 'rain', ambientVolume: 0, updatedAt: 1 } }).data.settings
+  assert.equal(ok.ambient, 'rain')
+  assert.equal(ok.ambientVolume, 0) // 0 is a valid volume
+  const bad = mergeImport(cur, { history: [], settings: { ambient: 'disco', ambientVolume: 150, updatedAt: 1 } }).data.settings
+  assert.equal(bad.ambient, 'off')
+  assert.equal(bad.ambientVolume, 40)
+})
