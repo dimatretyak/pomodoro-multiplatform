@@ -1,4 +1,7 @@
 export type Phase = 'focus' | 'short' | 'long'
+// Colors live in index.css under [data-palette=…]; this is the list of ids and names.
+export const palettes = { classic: 'Классика', ocean: 'Океан', sunset: 'Закат', forest: 'Лес', neon: 'Неон', amber: 'Янтарь', mono: 'Монохром' } as const
+export type Palette = keyof typeof palettes
 
 export interface Settings {
   focusMin: number
@@ -9,7 +12,7 @@ export interface Settings {
   autoStartFocus: boolean
   sound: boolean
   exercises: string[] // enabled exercise ids, may be empty
-  accent: string // focus-phase color, #rrggbb
+  palette: Palette
   updatedAt: number
 }
 
@@ -31,7 +34,7 @@ export const defaultSettings: Settings = {
   autoStartFocus: false,
   sound: true,
   exercises: ['box', 'rule-20', 'neck'],
-  accent: '#ff6b35',
+  palette: 'classic',
   updatedAt: 0,
 }
 

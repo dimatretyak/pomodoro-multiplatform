@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { categories, exercises, type Category } from './exercises.ts'
-import type { Settings as S } from './timer.ts'
+import { palettes, type Palette, type Settings as S } from './timer.ts'
 import Panel from './Panel.tsx'
 
 interface Props {
@@ -12,30 +12,26 @@ interface Props {
   onImport: (file: File) => Promise<string> // resolves to a status message
 }
 
-const ACCENTS = [
-  ['Апельсин', '#ff6b35'], ['Коралл', '#ff4d6d'], ['Янтарь', '#ffb020'], ['Лайм', '#b5e550'], ['Небо', '#4cc2ff'], ['Роза', '#ff7ad9'],
-] as const
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, Math.round(v) || min))
 
 export default function Settings({ open, settings: s, onClose, onChange, onExport, onImport }: Props) {
   const [msg, setMsg] = useState('')
-  const custom = !ACCENTS.some(([, c]) => c === s.accent)
   const set = <K extends keyof S>(k: K, v: S[K]) => onChange({ ...s, [k]: v })
   const toggleEx = (id: string) =>
     set('exercises', s.exercises.includes(id) ? s.exercises.filter((x) => x !== id) : [...s.exercises, id])
 
   return (
     <Panel open={open} title="Настройки" side="right" onClose={onClose}>
-      <Section no="00" title="Акцентный цвет">
-        <div className="swatches">
-          {ACCENTS.map(([name, c]) => (
-            <button key={c} className="swatch press" style={{ '--c': c } as React.CSSProperties} aria-label={name} title={name} aria-pressed={s.accent === c} onClick={() => set('accent', c)} />
+      <Section no="00" title="Палитра">
+        <div className="palettes">
+          {(Object.keys(palettes) as Palette[]).map((id) => (
+            <button key={id} data-palette={id} className="pal press" aria-pressed={s.palette === id} onClick={() => set('palette', id)}>
+              <span className="pal-dots" aria-hidden><i className="f" /><i className="s" /><i className="l" /></span>
+              {palettes[id]}
+            </button>
           ))}
-          <label className="swatch-custom press" title="Свой цвет" data-on={custom} style={{ '--c': s.accent } as React.CSSProperties}>
-            +
-            <input type="color" className="sr-only" aria-label="Свой цвет" value={s.accent} onChange={(e) => set('accent', e.currentTarget.value)} />
-          </label>
         </div>
+        <p className="set-note mt-2">Цвета фокуса, короткого и длинного перерыва.</p>
       </Section>
 
       <Section no="01" title="Длительность">

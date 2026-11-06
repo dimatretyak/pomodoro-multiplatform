@@ -81,11 +81,11 @@ test('import: union history by id, newer settings win, junk rejected', () => {
 
 test('import: out-of-range numbers, unknown exercises dropped', () => {
   const cur = { settings: { ...defaultSettings, updatedAt: 0 }, timer: initialState(defaultSettings), history: [] }
-  const s = mergeImport(cur, { settings: { focusMin: -5, shortMin: 10, accent: 'red;}', exercises: ['box', 'hack'], updatedAt: 1 }, history: [] }).data.settings
+  const s = mergeImport(cur, { settings: { focusMin: -5, shortMin: 10, palette: 'toString', exercises: ['box', 'hack'], updatedAt: 1 }, history: [] }).data.settings
   assert.equal(s.focusMin, 25)
   assert.equal(s.shortMin, 10)
   assert.deepEqual(s.exercises, ['box'])
-  assert.equal(s.accent, '#ff6b35') // CSS injection attempt rejected
+  assert.equal(s.palette, 'classic') // prototype key is not a palette
 })
 
 test('import retimes an untouched timer only', () => {

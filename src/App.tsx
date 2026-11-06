@@ -25,8 +25,8 @@ export default function App() {
     document.documentElement.dataset.phase = timer.phase
   }, [timer.phase])
   useEffect(() => {
-    document.documentElement.style.setProperty('--focus', settings.accent)
-  }, [settings.accent])
+    document.documentElement.dataset.palette = settings.palette
+  }, [settings.palette])
   // Soft tone on exercise step change (useful with eyes closed).
   const elapsed = (total - left) / 1000
   const at = exercise ? stepAt(exercise, elapsed) : null
@@ -80,7 +80,7 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' || open || statsOpen || (e.target as HTMLElement).closest('input,button,select,textarea')) return
+      if (e.code !== 'Space' || open || statsOpen || (e.target as HTMLElement).closest('input,select,textarea')) return
       e.preventDefault()
       toggle()
     }

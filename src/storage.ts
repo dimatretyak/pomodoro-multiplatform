@@ -1,5 +1,5 @@
 import { exercises } from './exercises.ts'
-import { defaultSettings, initialState, retime, type Phase, type Settings, type TimerState } from './timer.ts'
+import { defaultSettings, initialState, palettes, retime, type Phase, type Settings, type TimerState } from './timer.ts'
 
 // All data lives in this browser's localStorage. Records are plain JSON with
 // ids/timestamps so a future account sync can merge them.
@@ -47,7 +47,7 @@ function cleanSettings(raw: any): Partial<Settings> {
     const v = raw[k]
     if (typeof v !== typeof def) continue
     if (k === 'exercises') out[k] = Array.isArray(v) ? v.filter((id) => exercises.some((e) => e.id === id)) : def
-    else if (k === 'accent') out[k] = /^#[0-9a-f]{6}$/i.test(v) ? v : def
+    else if (k === 'palette') out[k] = Object.hasOwn(palettes, v) ? v : def
     else if (typeof def === 'number' && k !== 'updatedAt') {
       if (Number.isInteger(v) && v >= 1 && v <= 180) out[k] = v
     } else out[k] = v

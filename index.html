@@ -11,8 +11,7 @@
       // Apply saved phase before first paint so there is no color flash.
       try {
         var d = JSON.parse(localStorage.getItem('pomidoro:v1')) || {}
-        var a = d.settings && d.settings.accent
-        if (/^#[0-9a-f]{6}$/i.test(a)) document.documentElement.style.setProperty('--focus', a)
+        if (d.settings && /^[a-z]+$/.test(d.settings.palette)) document.documentElement.dataset.palette = d.settings.palette
         if (d.timer && d.timer.phase) document.documentElement.dataset.phase = d.timer.phase
       } catch (e) {}
     </script>
