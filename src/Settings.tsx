@@ -25,13 +25,13 @@ export default function Settings({ open, settings: s, onClose, onChange }: Props
         role="dialog"
         aria-label="Настройки"
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
-        className={`absolute inset-y-0 right-0 w-full max-w-[380px] overflow-y-auto border-l border-white/10 bg-[#141113]/95 p-6 transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
+        className={`absolute inset-y-0 right-0 w-full max-w-[380px] overflow-y-auto border-l border-(--line) bg-(--panel) backdrop-blur-xl p-6 transition-transform duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${
           open ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Настройки</h2>
-          <button onClick={onClose} aria-label="Закрыть" className="press grid size-9 place-items-center rounded-full text-(--muted) hover:bg-white/5 hover:text-white">
+          <button onClick={onClose} aria-label="Закрыть" className="press grid size-9 place-items-center rounded-full text-(--muted) hover:bg-(--hover) hover:text-(--fg)">
             ✕
           </button>
         </div>
@@ -41,6 +41,20 @@ export default function Settings({ open, settings: s, onClose, onChange }: Props
           <Num label="Короткий перерыв" value={s.shortMin} onChange={(v) => set('shortMin', clamp(v, 1, 60))} />
           <Num label="Длинный перерыв" value={s.longMin} onChange={(v) => set('longMin', clamp(v, 1, 90))} />
           <Num label="Сессий до длинного перерыва" value={s.longEvery} onChange={(v) => set('longEvery', clamp(v, 1, 12))} />
+        </Section>
+
+        <Section title="Тема">
+          <div className="grid grid-cols-3 gap-1 rounded-xl border border-(--line) bg-(--surface) p-1 text-sm">
+            {(['system', 'dark', 'light'] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => set('theme', t)}
+                className={`press rounded-lg py-1.5 ${s.theme === t ? 'bg-(--accent) font-medium text-[#0e0b0d]' : 'text-(--muted) hover:text-(--fg)'}`}
+              >
+                {{ system: 'Системная', dark: 'Тёмная', light: 'Светлая' }[t]}
+              </button>
+            ))}
+          </div>
         </Section>
 
         <Section title="Поведение">
@@ -74,7 +88,7 @@ export default function Settings({ open, settings: s, onClose, onChange }: Props
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-6">
-      <h3 className="mb-3 text-sm font-medium text-white/90">{title}</h3>
+      <h3 className="mb-3 text-sm font-medium text-(--fg)">{title}</h3>
       {children}
     </section>
   )
@@ -91,7 +105,7 @@ function Num({ label, value, onChange }: { label: string; value: number; onChang
         key={value}
         onBlur={(e) => onChange(e.currentTarget.valueAsNumber)}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-        className="w-20 rounded-lg border border-white/10 bg-white/[0.06] px-3 py-1.5 text-right tabular-nums outline-none focus:border-(--accent)"
+        className="w-20 rounded-lg border border-(--line) bg-(--surface) px-3 py-1.5 text-right tabular-nums outline-none focus:border-(--accent)"
       />
     </label>
   )
@@ -99,7 +113,7 @@ function Num({ label, value, onChange }: { label: string; value: number; onChang
 
 function Check({ label, checked, onChange }: { label: string; checked: boolean; onChange: () => void }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-lg py-1.5 text-[15px] hover:text-white">
+    <label className="flex cursor-pointer items-center gap-3 rounded-lg py-1.5 text-[15px] hover:text-(--fg)">
       <input type="checkbox" checked={checked} onChange={onChange} className="size-4" />
       <span>{label}</span>
     </label>

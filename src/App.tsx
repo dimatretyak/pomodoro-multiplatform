@@ -25,6 +25,15 @@ export default function App() {
     document.documentElement.dataset.phase = timer.phase
   }, [timer.phase])
   useEffect(() => {
+    const mq = matchMedia('(prefers-color-scheme: light)')
+    const apply = () => {
+      document.documentElement.dataset.theme = settings.theme === 'system' ? (mq.matches ? 'light' : 'dark') : settings.theme
+    }
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [settings.theme])
+  useEffect(() => {
     document.title = running || left < total ? `${fmt(left)} · ${labels[timer.phase]}` : 'Pomidoro'
   }, [left, running, total, timer.phase])
 
@@ -103,7 +112,7 @@ export default function App() {
       <button
         onClick={() => setOpen(true)}
         aria-label="Настройки"
-        className="press fixed top-4 right-4 grid size-11 place-items-center rounded-full text-(--muted) hover:bg-white/5 hover:text-white"
+        className="press fixed top-4 right-4 grid size-11 place-items-center rounded-full text-(--muted) hover:bg-(--hover) hover:text-(--fg)"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
@@ -168,7 +177,7 @@ export default function App() {
           <span
             key={i}
             className={`size-2 rounded-full transition-colors duration-300 ${
-              i < timer.done ? 'dot-done bg-(--accent)' : i === timer.done && timer.phase === 'focus' ? 'ring-1 ring-(--accent)' : 'bg-white/10'
+              i < timer.done ? 'dot-done bg-(--accent)' : i === timer.done && timer.phase === 'focus' ? 'ring-1 ring-(--accent)' : 'bg-(--line)'
             }`}
           />
         ))}
@@ -176,7 +185,7 @@ export default function App() {
 
       <div className="mt-8 h-10 text-center text-[13px] text-(--muted)">
         {exercise && settings.exercises.length > 1 && (
-          <button onClick={swapExercise} className="press mb-2 block w-full underline-offset-4 hover:text-white hover:underline">
+          <button onClick={swapExercise} className="press mb-2 block w-full underline-offset-4 hover:text-(--fg) hover:underline">
             Другое упражнение
           </button>
         )}
@@ -202,7 +211,7 @@ function IconButton({ label, onClick, children }: { label: string; onClick: () =
       onClick={onClick}
       aria-label={label}
       title={label}
-      className="press grid size-11 place-items-center rounded-full border border-white/10 bg-white/[0.06] text-(--muted) hover:border-white/20 hover:text-white"
+      className="press grid size-11 place-items-center rounded-full border border-(--line) bg-(--surface) text-(--muted) hover:border-(--line-2) hover:text-(--fg)"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         {children}

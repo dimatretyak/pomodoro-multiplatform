@@ -7,6 +7,14 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Pomidoro</title>
+    <script>
+      // Apply saved theme/phase before first paint so there is no color flash.
+      try {
+        var d = JSON.parse(localStorage.getItem('pomidoro:v1')) || {}, t = (d.settings && d.settings.theme) || 'system'
+        document.documentElement.dataset.theme = t === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t
+        if (d.timer && d.timer.phase) document.documentElement.dataset.phase = d.timer.phase
+      } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

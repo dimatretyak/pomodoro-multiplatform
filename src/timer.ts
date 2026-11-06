@@ -9,6 +9,7 @@ export interface Settings {
   autoStartFocus: boolean
   sound: boolean
   exercises: string[] // enabled exercise ids, may be empty
+  theme: 'system' | 'dark' | 'light'
   updatedAt: number
 }
 
@@ -30,6 +31,7 @@ export const defaultSettings: Settings = {
   autoStartFocus: false,
   sound: true,
   exercises: ['box', 'rule-20', 'neck'],
+  theme: 'system',
   updatedAt: 0,
 }
 
