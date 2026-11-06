@@ -27,6 +27,17 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.palette = settings.palette
   }, [settings.palette])
+  useEffect(() => {
+    const mq = matchMedia('(prefers-color-scheme: light)')
+    const apply = () => {
+      const light = settings.theme === 'light' || (settings.theme === 'system' && mq.matches)
+      document.documentElement.dataset.theme = light ? 'light' : 'dark'
+      document.querySelector('meta[name=theme-color]')?.setAttribute('content', light ? '#ece6dd' : '#0c0a09')
+    }
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [settings.theme])
   // Soft tone on exercise step change (useful with eyes closed).
   const elapsed = (total - left) / 1000
   const at = exercise ? stepAt(exercise, elapsed) : null

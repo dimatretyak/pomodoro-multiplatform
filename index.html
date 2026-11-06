@@ -11,7 +11,9 @@
       // Apply saved phase before first paint so there is no color flash.
       try {
         var d = JSON.parse(localStorage.getItem('pomidoro:v1')) || {}
-        if (d.settings && /^[a-z]+$/.test(d.settings.palette)) document.documentElement.dataset.palette = d.settings.palette
+        var s = d.settings || {}, t = s.theme || 'system'
+        if (/^[a-z]+$/.test(s.palette)) document.documentElement.dataset.palette = s.palette
+        document.documentElement.dataset.theme = t === 'system' ? (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark') : t
         if (d.timer && d.timer.phase) document.documentElement.dataset.phase = d.timer.phase
       } catch (e) {}
     </script>

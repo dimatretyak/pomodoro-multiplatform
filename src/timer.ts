@@ -13,6 +13,7 @@ export interface Settings {
   sound: boolean
   exercises: string[] // enabled exercise ids, may be empty
   palette: Palette
+  theme: 'system' | 'dark' | 'light'
   updatedAt: number
 }
 
@@ -35,6 +36,7 @@ export const defaultSettings: Settings = {
   sound: true,
   exercises: ['box', 'rule-20', 'neck'],
   palette: 'classic',
+  theme: 'system',
   updatedAt: 0,
 }
 

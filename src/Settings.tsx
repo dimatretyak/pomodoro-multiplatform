@@ -22,6 +22,16 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
 
   return (
     <Panel open={open} title="Настройки" side="right" onClose={onClose}>
+      <Section no="00" title="Тема">
+        <div className="seg">
+          {(['system', 'dark', 'light'] as const).map((t) => (
+            <button key={t} aria-pressed={s.theme === t} onClick={() => set('theme', t)} className="press">
+              {{ system: 'Авто', dark: 'Тёмная', light: 'Светлая' }[t]}
+            </button>
+          ))}
+        </div>
+      </Section>
+
       <Section no="00" title="Палитра">
         <div className="palettes">
           {(Object.keys(palettes) as Palette[]).map((id) => (

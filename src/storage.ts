@@ -47,6 +47,7 @@ function cleanSettings(raw: any): Partial<Settings> {
     const v = raw[k]
     if (typeof v !== typeof def) continue
     if (k === 'exercises') out[k] = Array.isArray(v) ? v.filter((id) => exercises.some((e) => e.id === id)) : def
+    else if (k === 'theme') out[k] = ['system', 'dark', 'light'].includes(v) ? v : def
     else if (k === 'palette') out[k] = Object.hasOwn(palettes, v) ? v : def
     else if (typeof def === 'number' && k !== 'updatedAt') {
       if (Number.isInteger(v) && v >= 1 && v <= 180) out[k] = v
