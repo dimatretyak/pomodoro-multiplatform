@@ -1,9 +1,24 @@
+import { useEffect, useRef } from 'react'
 import { stepAt, type Exercise } from './exercises.ts'
+import { tick } from './alerts.ts'
 
-export default function BreakView({ exercise, elapsed }: { exercise: Exercise; elapsed: number }) {
+interface Props {
+  exercise: Exercise
+  elapsed: number
+  cue: boolean // play a tone on step change
+}
+
+export default function BreakView({ exercise, elapsed, cue }: Props) {
   const at = stepAt(exercise, elapsed)
   const step = at ? exercise.steps[at.index] : null
   const left = at ? Math.ceil(at.left) : 0
+
+  const stepKey = `${exercise.id}:${at?.index ?? 'done'}`
+  const prevKey = useRef(stepKey)
+  useEffect(() => {
+    if (prevKey.current !== stepKey && cue) tick()
+    prevKey.current = stepKey
+  }, [stepKey, cue])
 
   if (exercise.loop && step) {
     // Hold keeps the size reached by the previous step.

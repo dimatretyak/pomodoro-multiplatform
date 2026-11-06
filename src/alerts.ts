@@ -1,20 +1,25 @@
 let ctx: AudioContext | null = null
 
-export function chime() {
+/** Soft single tone: exercise step changed (useful with eyes closed). */
+export const tick = () => tones([523], 0.12, 0.6)
+
+export const chime = () => tones([660, 880, 1320], 0.25, 1.2)
+
+function tones(freqs: number[], vol: number, len: number) {
   ctx ??= new AudioContext()
   const t = ctx.currentTime
-  ;[660, 880, 1320].forEach((f, i) => {
+  freqs.forEach((f, i) => {
     const o = ctx!.createOscillator()
     const g = ctx!.createGain()
     o.type = 'sine'
     o.frequency.value = f
     const at = t + i * 0.18
     g.gain.setValueAtTime(0, at)
-    g.gain.linearRampToValueAtTime(0.25, at + 0.02)
-    g.gain.exponentialRampToValueAtTime(0.001, at + 1.2)
+    g.gain.linearRampToValueAtTime(vol, at + 0.02)
+    g.gain.exponentialRampToValueAtTime(0.001, at + len)
     o.connect(g).connect(ctx!.destination)
     o.start(at)
-    o.stop(at + 1.3)
+    o.stop(at + len + 0.1)
   })
 }
 

@@ -132,7 +132,7 @@ export default function App() {
         </div>
         <div className="enter absolute inset-[9%] grid place-items-center text-center">
           {exercise ? (
-            <BreakView exercise={exercise} elapsed={(total - left) / 1000} />
+            <BreakView exercise={exercise} elapsed={(total - left) / 1000} cue={running && settings.sound} />
           ) : (
             <div>
               <div className="flex justify-center overflow-hidden text-[clamp(64px,17vw,96px)] leading-none font-light tracking-tight tabular-nums">
