@@ -141,8 +141,8 @@ export default function App() {
     today: { count: today.length, min: Math.round(today.reduce((a, h) => a + h.endedAt - h.startedAt, 0) / 60_000) },
     streak: streak(history, now),
     onToggle: toggle,
-    // Untouched phase: reset loses nothing, so no confirmation.
-    onReset: () => (running || left < total ? setPanel('reset') : doReset()),
+    // Untouched phase has nothing to reset (button is disabled, hotkey is a no-op).
+    onReset: () => (running || left < total) && setPanel('reset'),
     onSkip: () => setPanel('skip'),
     onSwap: swapExercise,
     onSettings: () => setPanel('settings'),

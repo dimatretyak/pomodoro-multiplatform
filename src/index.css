@@ -63,6 +63,8 @@ body::after {
 }
 
 button { cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.35; }
+button:disabled:active { transform: none; }
 .press { transition: transform 0.12s ease-out, color 0.2s, border-color 0.2s, background-color 0.2s, opacity 0.2s; }
 .press:active { transform: scale(0.95); }
 :focus-visible { outline: 1.5px solid var(--acc); outline-offset: 3px; border-radius: 6px; }
@@ -99,7 +101,7 @@ button { cursor: pointer; }
 
 .ins-ctrl { margin-top: 44px; display: flex; align-items: center; gap: clamp(10px, 5vw, 34px); }
 .ins-txt { font: 500 10.5px var(--mono); letter-spacing: 0.22em; color: var(--muted); padding: 10px 4px; }
-.ins-txt:hover { color: var(--fg); }
+.ins-txt:hover:not(:disabled) { color: var(--fg); }
 .ins-play { width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; color: var(--on-acc); background: radial-gradient(circle at 35% 30%, var(--acc-hi), var(--acc) 60%); box-shadow: 0 0 0 6px var(--ring), 0 10px 40px -6px var(--acc), inset 0 -4px 10px #0004; }
 .ins-segs { margin-top: 30px; display: flex; gap: 6px; }
 .ins-segs span { width: 26px; height: 3px; border-radius: 2px; background: var(--dim); transition: background 0.3s, box-shadow 0.3s; }
@@ -154,7 +156,6 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; 
 .stepper { display: flex; align-items: center; gap: 8px; }
 .stepper button { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--dim); color: var(--muted); font: 400 15px var(--mono); line-height: 1; }
 .stepper button:hover:not(:disabled) { color: var(--fg); border-color: var(--muted); }
-.stepper button:disabled { opacity: 0.35; cursor: default; }
 .stepper input { width: 48px; background: none; border: 0; text-align: center; font-weight: 200; font-size: 26px; color: var(--fg); font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
 .stepper input::-webkit-inner-spin-button, .stepper input::-webkit-outer-spin-button { -webkit-appearance: none; }
 

@@ -69,7 +69,7 @@ export default function Instrument(p: FaceProps) {
       )}
 
       <div className="ins-ctrl">
-        <button className="ins-txt press" onClick={p.onReset} title="Сброс (R)">СБРОС</button>
+        <button className="ins-txt press" onClick={p.onReset} disabled={!p.started} title={p.started ? 'Сброс (R)' : 'Нечего сбрасывать: фаза не начата'}>СБРОС</button>
         <button className="ins-play press" onClick={p.onToggle} aria-label={actionLabel(p)} title={`${actionLabel(p)} (пробел)`}>
           {p.running ? <IconPause /> : <IconPlay />}
         </button>
