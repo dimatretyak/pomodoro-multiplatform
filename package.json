@@ -5,7 +5,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node --test src/*.test.ts"
+    "test": "node --test src/*.test.ts",
+    "cert": "mkdir -p .cert && openssl req -x509 -newkey rsa:2048 -nodes -days 365 -keyout .cert/key.pem -out .cert/cert.pem -subj /CN=pomidoro-dev -addext \"subjectAltName=DNS:localhost,IP:127.0.0.1,IP:$(ipconfig getifaddr en0 || echo 127.0.0.1)\"",
+    "dev:https": "HTTPS=1 vite --host",
+    "preview:https": "vite build && HTTPS=1 vite preview --host"
   },
   "type": "module",
   "dependencies": {
