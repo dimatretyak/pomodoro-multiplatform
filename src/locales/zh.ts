@@ -166,4 +166,5 @@ export default {
   "What you worked on": "做了什么",
   "Save": "保存",
   "Edit": "编辑",
+  "Custom": "自定义",
 } satisfies Record<string, string>

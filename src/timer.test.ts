@@ -192,3 +192,10 @@ test('edit history record and merge edits by updatedAt', () => {
   assert.equal(r.data.history[0].task, 'New name')
   assert.equal(r.added, 0) // an update, not a new record
 })
+
+test('custom palette colors are validated on import', () => {
+  const cur = { settings: { ...defaultSettings, updatedAt: 0 }, timer: initialState(defaultSettings), history: [], task: '' }
+  const s = mergeImport(cur, { history: [], settings: { palette: 'custom', customColors: { focus: '#123abc', short: 'red', long: 'url(x)' }, updatedAt: 1 } }).data.settings
+  assert.equal(s.palette, 'custom')
+  assert.deepEqual(s.customColors, { focus: '#123abc', short: defaultSettings.customColors.short, long: defaultSettings.customColors.long })
+})

@@ -46,12 +46,37 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
       <Section no="00" title={t('Палитра', 'Palette')}>
         <div className="palettes">
           {(Object.keys(palettes) as Palette[]).map((id) => (
-            <button key={id} data-palette={id} className="pal press" aria-pressed={s.palette === id} onClick={() => set('palette', id)}>
+            <button
+              key={id}
+              data-palette={id}
+              className="pal press"
+              aria-pressed={s.palette === id}
+              onClick={() => set('palette', id)}
+              style={id === 'custom' ? ({ '--c-focus': s.customColors.focus, '--c-short': s.customColors.short, '--c-long': s.customColors.long } as React.CSSProperties) : undefined}
+            >
               <span className="pal-dots" aria-hidden><i className="f" /><i className="s" /><i className="l" /></span>
               {tr(palettes[id])}
             </button>
           ))}
         </div>
+        {s.palette === 'custom' && (
+          <div className="custom-colors fade-up">
+            {(['focus', 'short', 'long'] as const).map((k) => {
+              const label = { focus: t('Фокус', 'Focus'), short: t('Короткий перерыв', 'Short break'), long: t('Длинный перерыв', 'Long break') }[k]
+              return (
+                <label key={k} className="custom-color">
+                  <input
+                    type="color"
+                    value={s.customColors[k]}
+                    onChange={(e) => set('customColors', { ...s.customColors, [k]: e.currentTarget.value })}
+                    aria-label={label}
+                  />
+                  <span>{label}</span>
+                </label>
+              )
+            })}
+          </div>
+        )}
       </Section>
 
       <Section no="01" title={t('Длительность', 'Durations')}>

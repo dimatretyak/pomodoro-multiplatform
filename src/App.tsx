@@ -33,8 +33,14 @@ export default function App() {
     document.documentElement.lang = settings.lang
   }, [settings.lang])
   useEffect(() => {
-    document.documentElement.dataset.palette = settings.palette
-  }, [settings.palette])
+    const html = document.documentElement
+    html.dataset.palette = settings.palette
+    // Custom palette: inline vars beat the [data-palette] rules in index.css.
+    for (const k of ['focus', 'short', 'long'] as const) {
+      if (settings.palette === 'custom') html.style.setProperty(`--c-${k}`, settings.customColors[k])
+      else html.style.removeProperty(`--c-${k}`)
+    }
+  }, [settings.palette, settings.customColors])
   useEffect(() => {
     const mq = matchMedia('(prefers-color-scheme: light)')
     const apply = () => {

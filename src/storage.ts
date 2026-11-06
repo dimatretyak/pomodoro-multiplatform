@@ -1,6 +1,6 @@
 import { exercises } from './exercises.ts'
 import { langs, t } from './i18n.ts'
-import { defaultSettings, initialState, palettes, retime, type Phase, type Settings, type TimerState } from './timer.ts'
+import { defaultSettings, initialState, isHex, palettes, retime, type Phase, type Settings, type TimerState } from './timer.ts'
 
 // All data lives in this browser's localStorage. Records are plain JSON with
 // ids/timestamps so a future account sync can merge them.
@@ -59,6 +59,10 @@ function cleanSettings(raw: any): Partial<Settings> {
     else if (k === 'lang') out[k] = langs.includes(v) ? v : def
     else if (k === 'theme') out[k] = ['system', 'dark', 'light'].includes(v) ? v : def
     else if (k === 'palette') out[k] = Object.hasOwn(palettes, v) ? v : def
+    else if (k === 'customColors') {
+      const d = def as Settings['customColors']
+      out[k] = { focus: isHex(v?.focus) ? v.focus : d.focus, short: isHex(v?.short) ? v.short : d.short, long: isHex(v?.long) ? v.long : d.long }
+    }
     else if (typeof def === 'number' && k !== 'updatedAt') {
       if (Number.isInteger(v) && v >= 1 && v <= 180) out[k] = v
     } else out[k] = v

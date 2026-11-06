@@ -166,4 +166,5 @@ export default {
   "What you worked on": "取り組んだこと",
   "Save": "保存",
   "Edit": "編集",
+  "Custom": "カスタム",
 } satisfies Record<string, string>

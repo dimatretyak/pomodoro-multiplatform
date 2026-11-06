@@ -6,8 +6,11 @@ export const palettes = {
   neon: ['Неон', 'Neon'], amber: ['Янтарь', 'Amber'], mono: ['Монохром', 'Mono'],
   lavender: ['Лаванда', 'Lavender'], cherry: ['Вишня', 'Cherry'], citrus: ['Цитрус', 'Citrus'], arctic: ['Арктика', 'Arctic'],
   retro: ['Ретро', 'Retro'], fjord: ['Фьорд', 'Fjord'], sakura: ['Сакура', 'Sakura'],
+  custom: ['Свои цвета', 'Custom'], // colors come from Settings.customColors
 } satisfies Record<string, L>
 export type Palette = keyof typeof palettes
+export interface CustomColors { focus: string; short: string; long: string }
+export const isHex = (v: unknown): v is string => typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v)
 
 export interface Settings {
   focusMin: number
@@ -20,6 +23,7 @@ export interface Settings {
   ticking: boolean // clock ticking during focus, needs `sound`
   exercises: string[] // enabled exercise ids, may be empty
   palette: Palette
+  customColors: CustomColors
   theme: 'system' | 'dark' | 'light'
   lang: Lang
   updatedAt: number
@@ -45,6 +49,7 @@ export const defaultSettings: Settings = {
   ticking: false,
   exercises: ['box', 'rule-20', 'neck'],
   palette: 'classic',
+  customColors: { focus: '#ff6b35', short: '#5ee0b8', long: '#9d8cff' },
   theme: 'system',
   lang: browserLang(),
   updatedAt: 0,

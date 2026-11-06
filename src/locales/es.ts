@@ -166,4 +166,5 @@ export default {
   "What you worked on": "En qué trabajaste",
   "Save": "Guardar",
   "Edit": "Editar",
+  "Custom": "Personalizada",
 } satisfies Record<string, string>
