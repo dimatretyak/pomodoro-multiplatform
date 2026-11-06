@@ -197,6 +197,8 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 22px; 
 .pal { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; font: 400 11.5px var(--mono); color: var(--chip-fg); text-align: left; }
 .pal:hover { border-color: var(--dim); color: var(--fg); }
 .pal[aria-pressed='true'] { border-color: color-mix(in oklab, var(--c-focus) 55%, transparent); color: var(--fg); background: color-mix(in oklab, var(--c-focus) 7%, transparent); }
+.langs { grid-template-columns: repeat(3, 1fr); }
+.langs .pal { justify-content: center; padding: 10px 4px; }
 .pal-dots { display: flex; align-items: center; gap: 4px; }
 .pal-dots i { width: 8px; height: 8px; border-radius: 50%; }
 .pal-dots .f { width: 14px; height: 14px; background: var(--c-focus); box-shadow: 0 0 8px var(--c-focus); }

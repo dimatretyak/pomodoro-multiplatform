@@ -2,7 +2,7 @@ import { useId, useState } from 'react'
 import { categories, exercises, type Category } from './exercises.ts'
 import { palettes, type Palette, type Settings as S } from './timer.ts'
 import Panel from './Panel.tsx'
-import { langs, t, tr } from './i18n.ts'
+import { langNames, langs, t, tr } from './i18n.ts'
 
 interface Props {
   open: boolean
@@ -24,10 +24,10 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
   return (
     <Panel open={open} title={t('Настройки', 'Settings')} side="right" onClose={onClose}>
       <Section no="00" title={t('Язык', 'Language')}>
-        <div className="seg">
+        <div className="palettes langs">
           {langs.map((l) => (
-            <button key={l} lang={l} aria-pressed={s.lang === l} onClick={() => set('lang', l)} className="press">
-              {{ ru: 'Русский', en: 'English' }[l]}
+            <button key={l} lang={l} aria-pressed={s.lang === l} onClick={() => set('lang', l)} className="pal press">
+              {langNames[l]}
             </button>
           ))}
         </div>

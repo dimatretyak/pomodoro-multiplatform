@@ -95,10 +95,10 @@ export default function Instrument(p: FaceProps) {
         <button className="ins-txt press" onClick={p.onSkip} title={t('Далее (N)', 'Next (N)')}>{t('ДАЛЕЕ', 'NEXT')}</button>
       </div>
 
-      <div className="ins-segs" aria-label={t(`Сессий в цикле: ${p.done} из ${p.longEvery}`, `Sessions in cycle: ${p.done} of ${p.longEvery}`)}>
+      <div className="ins-segs" aria-label={t('Сессий в цикле: {done} из {total}', 'Sessions in cycle: {done} of {total}', { done: p.done, total: p.longEvery })}>
         {Array.from({ length: p.longEvery }, (_, i) => <span key={i} className={i < p.done ? 'on' : i === p.done && p.phase === 'focus' ? 'cur' : ''} />)}
       </div>
-      <div className="ins-foot">{t(`СЕГОДНЯ ${p.today.count} · ${p.today.min} МИН · СЕРИЯ ${p.streak} ДН`, `TODAY ${p.today.count} · ${p.today.min} MIN · STREAK ${p.streak} D`)}</div>
+      <div className="ins-foot">{t('СЕГОДНЯ {count} · {min} МИН · СЕРИЯ {streak} ДН', 'TODAY {count} · {min} MIN · STREAK {streak} D', { count: p.today.count, min: p.today.min, streak: p.streak })}</div>
     </div>
   )
 }

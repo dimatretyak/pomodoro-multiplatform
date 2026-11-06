@@ -105,7 +105,7 @@ test('week compare', () => {
   assert.equal(weekCompare(Array(14).fill(d(0))).pct, null)
 })
 
-import { plural, setLang } from './i18n.ts'
+import { plural, setLang, t } from './i18n.ts'
 
 test('plurals in both languages', () => {
   const w = (n: number) => plural(n, ['день', 'дня', 'дней'], ['day', 'days'])
@@ -139,4 +139,37 @@ test('import keeps valid task, rejects oversized', () => {
   const rec = (id: string, task: unknown) => ({ id, phase: 'focus', startedAt: 0, endedAt: 10, completed: true, task })
   const { data } = mergeImport(cur, { history: [rec('ok', 'Write docs'), rec('none', undefined), rec('big', 'x'.repeat(500)), rec('num', 5)] })
   assert.deepEqual(data.history.map((h) => h.id), ['ok', 'none'])
+})
+
+import { readFileSync, readdirSync } from 'node:fs'
+import { langs } from './i18n.ts'
+
+test('every locale translates every UI string', async () => {
+  const src = readdirSync('src').filter((f) => /\.tsx?$/.test(f) && !f.includes('test') && f !== 'i18n.ts')
+    .map((f) => readFileSync(`src/${f}`, 'utf8')).join('\n')
+  const s = String.raw`'((?:[^'\\]|\\.)*)'`
+  const keys = new Set(['session', 'sessions'])
+  for (const m of src.matchAll(new RegExp(String.raw`\bt\(\s*${s},\s*${s}`, 'g'))) keys.add(m[2])
+  for (const m of src.matchAll(new RegExp(String.raw`\[\s*${s},\s*${s}\s*\]`, 'g'))) if (/[А-Яа-яЁё]/.test(m[1])) keys.add(m[2])
+  for (const m of src.matchAll(new RegExp(String.raw`plural\([^,]+,\s*\[[^\]]*\],\s*\[\s*${s},\s*${s}\s*\]`, 'g'))) keys.add(m[1]).add(m[2])
+  assert.ok(keys.size > 100, `extracted only ${keys.size} strings`)
+  for (const l of langs.filter((x) => x !== 'ru' && x !== 'en')) {
+    const dict: Record<string, string> = (await import(`./locales/${l}.ts`)).default
+    const missing = [...keys].filter((k) => !(k in dict))
+    assert.deepEqual(missing, [], `${l} is missing translations`)
+    // placeholders must survive translation
+    for (const k of keys) for (const ph of k.match(/\{\w+\}/g) ?? []) assert.ok(dict[k].includes(ph), `${l}: "${k}" lost ${ph}`)
+  }
+})
+
+test('other languages: lookup, placeholders, plurals', () => {
+  setLang('de')
+  assert.equal(t('Сброс', 'Reset'), 'Zurücksetzen')
+  assert.equal(t('х', 'Imported: {n}', { n: 3 }), 'Importiert: 3')
+  assert.equal(plural(1, ['день', 'дня', 'дней'], ['day', 'days']), 'Tag')
+  assert.equal(plural(5, ['день', 'дня', 'дней'], ['day', 'days']), 'Tage')
+  setLang('fr')
+  assert.equal(plural(0, ['день', 'дня', 'дней'], ['day', 'days']), 'jour') // French: 0 is singular
+  assert.equal(t('нет', 'not translated anywhere'), 'not translated anywhere') // falls back to English
+  setLang('ru')
 })

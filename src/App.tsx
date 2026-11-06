@@ -68,7 +68,8 @@ export default function App() {
       const rec: SessionRecord = { id: crypto.randomUUID?.() ?? `${n}-${Math.random().toString(36).slice(2)}`, phase: d.timer.phase, startedAt: n - elapsed, endedAt: n, completed }
       const task = d.task.trim()
       if (task && d.timer.phase === 'focus') rec.task = task
-      return { ...d, timer: next(d.timer, d.settings, n), history: elapsed > 1000 ? [...d.history, rec] : d.history }
+      // A skip under a minute is noise; a completed phase is always recorded.
+      return { ...d, timer: next(d.timer, d.settings, n), history: completed || elapsed >= 60_000 ? [...d.history, rec] : d.history }
     })
     setNow(Date.now())
   }, [])
@@ -131,7 +132,7 @@ export default function App() {
       const raw = JSON.parse(await f.text())
       const { added } = mergeImport(data, raw) // validates; throws on a bad file
       setData((d) => mergeImport(d, raw).data) // merge into latest state, not the closure
-      return t(`Импортировано: ${added} ${sessionsWord(added)}`, `Imported: ${added} ${sessionsWord(added)}`)
+      return t('Импортировано: {n}', 'Imported: {n}', { n: `${added} ${sessionsWord(added)}` })
     } catch (e) {
       return `${t('Не удалось импортировать', 'Import failed')}: ${e instanceof SyntaxError ? t('файл повреждён', 'the file is corrupted') : (e as Error).message}`
     }
