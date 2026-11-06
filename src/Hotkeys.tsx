@@ -9,6 +9,7 @@ const KEYS: [string[], string][] = [
   [['A'], 'Статистика'],
   [['S'], 'Настройки'],
   [['?'], 'Эта справка'],
+  [['Y', 'N'], 'Да / нет в окне подтверждения'],
   [['Esc'], 'Закрыть окно'],
 ]
 
@@ -18,7 +19,7 @@ export default function Hotkeys({ open, onClose }: { open: boolean; onClose: () 
       <dl className="keys">
         {KEYS.map(([keys, what]) => (
           <div key={what} className="keys-row">
-            <dt>{keys.map((k, i) => <span key={k}>{i > 0 && <i>или</i>}<kbd>{k}</kbd></span>)}</dt>
+            <dt>{keys.map((k, i) => <span key={k}>{i > 0 && <i>{keys[0] === 'Y' ? '/' : 'или'}</i>}<kbd>{k}</kbd></span>)}</dt>
             <dd>{what}</dd>
           </div>
         ))}
