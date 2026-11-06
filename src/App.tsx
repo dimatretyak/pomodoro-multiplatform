@@ -5,6 +5,7 @@ import { chime, notify, unlock } from './alerts.ts'
 import { byId } from './exercises.ts'
 import BreakView from './BreakView.tsx'
 import Settings from './Settings.tsx'
+import Stats, { sessionsWord } from './Stats.tsx'
 
 const labels: Record<Phase, string> = { focus: 'Фокус', short: 'Короткий перерыв', long: 'Длинный перерыв' }
 const R = 45
@@ -14,6 +15,7 @@ export default function App() {
   const [data, setData] = useState(load)
   const [now, setNow] = useState(Date.now)
   const [open, setOpen] = useState(false)
+  const [statsOpen, setStatsOpen] = useState(false)
   const { settings, timer, history } = data
   const running = timer.endAt !== null
   const left = remainingMs(timer, now)
@@ -75,13 +77,13 @@ export default function App() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' || open || (e.target as HTMLElement).closest('input,button,select,textarea')) return
+      if (e.code !== 'Space' || open || statsOpen || (e.target as HTMLElement).closest('input,button,select,textarea')) return
       e.preventDefault()
       toggle()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [toggle, open])
+  }, [toggle, open, statsOpen])
 
   const saveSettings = (s: S) =>
     setData((d) => ({
@@ -117,6 +119,16 @@ export default function App() {
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" />
           <circle cx="16" cy="6" r="2" /><circle cx="10" cy="12" r="2" /><circle cx="18" cy="18" r="2" />
+        </svg>
+      </button>
+
+      <button
+        onClick={() => setStatsOpen(true)}
+        aria-label="Статистика"
+        className="press fixed top-4 left-4 grid size-11 place-items-center rounded-full text-(--muted) hover:bg-(--hover) hover:text-(--fg)"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M5 20V12M10 20V6M15 20v-9M20 20V9" />
         </svg>
       </button>
 
@@ -189,20 +201,14 @@ export default function App() {
             Другое упражнение
           </button>
         )}
-        {today.length > 0 && `Сегодня: ${today.length} ${plural(today.length)} · ${todayMin} мин`}
+        {today.length > 0 && `Сегодня: ${today.length} ${sessionsWord(today.length)} · ${todayMin} мин`}
       </div>
 
+      <Stats open={statsOpen} history={history} onClose={() => setStatsOpen(false)} />
       <Settings open={open} settings={settings} onClose={() => setOpen(false)} onChange={saveSettings} />
     </main>
     </>
   )
-}
-
-function plural(n: number) {
-  const m10 = n % 10, m100 = n % 100
-  if (m10 === 1 && m100 !== 11) return 'сессия'
-  if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'сессии'
-  return 'сессий'
 }
 
 function IconButton({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {

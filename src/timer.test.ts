@@ -45,3 +45,18 @@ test('exercise steps: linear ends, breathing loops', () => {
   const box = byId('box')!
   assert.deepEqual(stepAt(box, 16 * 3 + 5), { index: 1, left: 3 })
 })
+
+import { lastDays, streak } from './stats.ts'
+
+test('stats: per-day buckets and streak', () => {
+  const now = new Date(2026, 10, 6, 15).getTime()
+  const at = (day: number, h: number, min: number, completed = true) => {
+    const end = new Date(2026, 10, day, h).getTime()
+    return { id: `${day}${h}`, phase: 'focus' as const, startedAt: end - min * 60_000, endedAt: end, completed }
+  }
+  const hist = [at(6, 10, 25), at(6, 12, 25), at(5, 9, 25), at(4, 9, 25, false), at(3, 9, 50)]
+  const days = lastDays(hist, now, 4)
+  assert.deepEqual(days.map((d) => [new Date(d.start).getDate(), d.min, d.count]), [[3, 50, 1], [4, 0, 0], [5, 25, 1], [6, 50, 2]])
+  assert.equal(streak(hist, now), 2) // 6th and 5th; 4th only skipped
+  assert.equal(streak(hist.slice(2), now), 1) // today empty → count from yesterday
+})

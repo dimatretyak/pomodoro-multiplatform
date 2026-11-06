@@ -55,6 +55,7 @@ body {
   .breath { transition-property: scale; transition-timing-function: ease-in-out; }
   @starting-style { .breath { scale: 0.55 !important; } }
   .fade-up { animation: fade-up 0.4s ease-out both; }
+  .bar { transform-origin: bottom; animation: grow 0.6s cubic-bezier(0.2, 0, 0, 1) both; }
   .digit { display: inline-block; animation: digit 0.35s cubic-bezier(0.2, 0, 0, 1) both; }
   .blob { animation: drift 28s ease-in-out infinite alternate; }
   .blob-2 { animation-duration: 36s; animation-direction: alternate-reverse; }
@@ -66,6 +67,7 @@ body {
 @keyframes pulse { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
 @keyframes digit { from { opacity: 0; transform: translateY(-35%); filter: blur(3px); } to { opacity: 1; transform: none; filter: none; } }
 @keyframes drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(18vmax, 12vmax) scale(1.15); } }
+@keyframes grow { from { transform: scaleY(0); } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 input[type='checkbox'] { accent-color: var(--accent); }
