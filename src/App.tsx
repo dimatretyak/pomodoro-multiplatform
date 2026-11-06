@@ -17,7 +17,7 @@ export default function App() {
   const { settings, timer, history } = data
   const running = timer.endAt !== null
   const left = remainingMs(timer, now)
-  const total = duration(timer.phase, settings)
+  const total = Math.max(duration(timer.phase, settings), left) // duration may shrink mid-phase
   const exercise = timer.phase !== 'focus' ? byId(timer.exerciseId) : null
 
   useEffect(() => save(data), [data])
@@ -78,7 +78,7 @@ export default function App() {
     setData((d) => ({
       ...d,
       settings: { ...s, updatedAt: Date.now() },
-      timer: d.timer.endAt === null ? reset(d.timer, s) : d.timer,
+      timer: d.timer.endAt === null && d.timer.remaining === duration(d.timer.phase, d.settings) ? reset(d.timer, s) : d.timer,
     }))
 
   const swapExercise = () =>
