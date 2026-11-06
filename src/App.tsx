@@ -30,6 +30,7 @@ export default function App() {
     const mq = matchMedia('(prefers-color-scheme: light)')
     const apply = () => {
       document.documentElement.dataset.theme = settings.theme === 'system' ? (mq.matches ? 'light' : 'dark') : settings.theme
+      document.querySelector('meta[name=theme-color]')?.setAttribute('content', settings.theme === 'light' || (settings.theme === 'system' && mq.matches) ? '#f0e9e7' : '#0e0b0d')
     }
     apply()
     mq.addEventListener('change', apply)
