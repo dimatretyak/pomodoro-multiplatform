@@ -49,7 +49,14 @@ const I = ({ d, size = 20 }: { d: string; size?: number }) => (
 )
 export const IconStats = () => <I d="M5 20V12M10 20V6M15 20v-9M20 20V9" />
 export const IconSettings = () => <I d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M16 4v4M10 10v4M18 16v4" />
-export const IconKeys = () => <I d="M3 7h18v10H3zM7 11h.01M11 11h.01M15 11h.01M8 14h8" />
+// Keycap with a question mark: thicker bottom edge like a physical key
+export const IconKeys = () => (
+  <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M7 3.5h10a3.5 3.5 0 0 1 3.5 3.5v9a3.5 3.5 0 0 1-3.5 3.5H7A3.5 3.5 0 0 1 3.5 16V7A3.5 3.5 0 0 1 7 3.5z" />
+    <path d="M4 17.5c.6 1.2 1.7 2 3 2h10c1.3 0 2.4-.8 3-2" strokeWidth="1.2" opacity=".5" />
+    <path d="M9.8 9.2a2.3 2.3 0 1 1 3.3 2.1c-.7.3-1.1.9-1.1 1.6v.3M12 15.9h.01" />
+  </svg>
+)
 export const IconReset = () => <I d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
 export const IconSkip = () => <I d="M5 4l10 8-10 8zM19 5v14" />
 export const IconPlay = ({ size = 22 }) => (
