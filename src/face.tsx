@@ -1,5 +1,6 @@
 import { stepAt, type Exercise } from './exercises.ts'
 import type { Phase } from './timer.ts'
+import { t } from './i18n.ts'
 
 export interface FaceProps {
   phase: Phase
@@ -23,8 +24,8 @@ export interface FaceProps {
   onHelp: () => void
 }
 
-export const phaseLabel: Record<Phase, string> = { focus: 'Фокус', short: 'Короткий перерыв', long: 'Длинный перерыв' }
-export const actionLabel = (p: FaceProps) => (p.running ? 'Пауза' : p.started ? 'Продолжить' : 'Старт')
+export const phaseLabel = (p: Phase) => ({ focus: t('Фокус', 'Focus'), short: t('Короткий перерыв', 'Short break'), long: t('Длинный перерыв', 'Long break') })[p]
+export const actionLabel = (p: FaceProps) => (p.running ? t('Пауза', 'Pause') : p.started ? t('Продолжить', 'Resume') : t('Старт', 'Start'))
 
 const pad = (n: number) => String(n).padStart(2, '0')
 export const split = (ms: number) => {

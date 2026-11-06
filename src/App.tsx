@@ -4,8 +4,9 @@ import { download, load, mergeImport, save, type SessionRecord } from './storage
 import { chime, notify, tick, unlock } from './alerts.ts'
 import { byId, stepAt } from './exercises.ts'
 import { streak } from './stats.ts'
+import { sessionsWord, setLang, t } from './i18n.ts'
 import Settings from './Settings.tsx'
-import Stats, { sessionsWord } from './Stats.tsx'
+import Stats from './Stats.tsx'
 import { phaseLabel, type FaceProps } from './face.tsx'
 import Instrument from './Instrument.tsx'
 import Hotkeys from './Hotkeys.tsx'
@@ -17,6 +18,7 @@ export default function App() {
   // reset/skip are confirmation modals
   const [panel, setPanel] = useState<'settings' | 'stats' | 'help' | 'reset' | 'skip' | null>(null)
   const { settings, timer, history } = data
+  setLang(settings.lang) // before any child renders; see i18n.ts
   const running = timer.endAt !== null
   const left = remainingMs(timer, now)
   const total = Math.max(duration(timer.phase, settings), left) // duration may shrink mid-phase
@@ -26,6 +28,9 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.phase = timer.phase
   }, [timer.phase])
+  useEffect(() => {
+    document.documentElement.lang = settings.lang
+  }, [settings.lang])
   useEffect(() => {
     document.documentElement.dataset.palette = settings.palette
   }, [settings.palette])
@@ -51,7 +56,7 @@ export default function App() {
   }, [stepKey, running, settings.sound])
 
   useEffect(() => {
-    document.title = running || left < total ? `${fmt(left)} · ${phaseLabel[timer.phase]}` : 'Pomidoro'
+    document.title = running || left < total ? `${fmt(left)} · ${phaseLabel(timer.phase)}` : 'Pomidoro'
   }, [left, running, total, timer.phase])
 
   const advance = useCallback((completed: boolean) => {
@@ -78,7 +83,7 @@ export default function App() {
     const id = setTimeout(() => {
       if (settings.sound) chime()
       const toBreak = timer.phase === 'focus'
-      notify(toBreak ? 'Время перерыва' : 'Пора за работу', toBreak ? 'Отличная сессия! Отдохните.' : 'Перерыв закончился.')
+      notify(toBreak ? t('Время перерыва', 'Break time') : t('Пора за работу', 'Back to work'), toBreak ? t('Отличная сессия! Отдохните.', 'Great session! Take a rest.') : t('Перерыв закончился.', 'The break is over.'))
       advance(true)
     }, Math.max(0, timer.endAt - Date.now()))
     return () => clearTimeout(id)
@@ -103,9 +108,9 @@ export default function App() {
       const raw = JSON.parse(await f.text())
       const { added } = mergeImport(data, raw) // validates; throws on a bad file
       setData((d) => mergeImport(d, raw).data) // merge into latest state, not the closure
-      return `Импортировано: ${added} ${sessionsWord(added)}`
+      return t(`Импортировано: ${added} ${sessionsWord(added)}`, `Imported: ${added} ${sessionsWord(added)}`)
     } catch (e) {
-      return `Не удалось импортировать: ${e instanceof SyntaxError ? 'файл повреждён' : (e as Error).message}`
+      return `${t('Не удалось импортировать', 'Import failed')}: ${e instanceof SyntaxError ? t('файл повреждён', 'the file is corrupted') : (e as Error).message}`
     }
   }
 
@@ -182,9 +187,9 @@ export default function App() {
       <Hotkeys open={panel === 'help'} onClose={() => setPanel(null)} />
       <Confirm
         open={panel === 'reset'}
-        title="Сбросить таймер?"
-        text="Текущая фаза начнётся заново, прогресс будет потерян."
-        action="Сбросить"
+        title={t('Сбросить таймер?', 'Reset the timer?')}
+        text={t('Текущая фаза начнётся заново, прогресс будет потерян.', 'The current phase starts over and its progress is lost.')}
+        action={t('Сбросить', 'Reset')}
         onConfirm={() => {
           setPanel(null)
           doReset()
@@ -193,9 +198,9 @@ export default function App() {
       />
       <Confirm
         open={panel === 'skip'}
-        title="Перейти дальше?"
-        text={timer.phase === 'focus' ? 'Фокус-сессия закончится досрочно и не попадёт в статистику.' : 'Перерыв закончится, начнётся фокус.'}
-        action="Далее"
+        title={t('Перейти дальше?', 'Skip ahead?')}
+        text={timer.phase === 'focus' ? t('Фокус-сессия закончится досрочно и не попадёт в статистику.', 'The focus session ends early and won’t count in stats.') : t('Перерыв закончится, начнётся фокус.', 'The break ends and focus begins.')}
+        action={t('Далее', 'Next')}
         onConfirm={() => {
           setPanel(null)
           advance(false)

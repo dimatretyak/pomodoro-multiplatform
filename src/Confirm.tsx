@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import Panel from './Panel.tsx'
+import { t } from './i18n.ts'
 
 interface Props {
   open: boolean
@@ -32,7 +33,7 @@ export default function Confirm({ open, title, text, action, onConfirm, onClose 
     <Panel open={open} title={title} side="center" onClose={onClose}>
       <p className="confirm-text">{text}</p>
       <div className="confirm-actions">
-        <button className="confirm-cancel press" onClick={onClose}>Отмена <kbd>N</kbd></button>
+        <button className="confirm-cancel press" onClick={onClose}>{t('Отмена', 'Cancel')} <kbd>N</kbd></button>
         <button className="confirm-ok press" onClick={onConfirm} data-autofocus>{action} <kbd>Y</kbd></button>
       </div>
     </Panel>

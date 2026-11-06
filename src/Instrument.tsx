@@ -1,10 +1,11 @@
+import { t, tr } from './i18n.ts'
 import { actionLabel, IconKeys, IconPause, IconPlay, IconSettings, IconStats, split, stepInfo, type FaceProps } from './face.tsx'
 
 const TICKS = Array.from({ length: 60 }, (_, i) => {
   const a = (i / 60) * Math.PI * 2, major = i % 5 === 0, r1 = major ? 124 : 132, r2 = 144
   return { major, x1: 152 + Math.sin(a) * r1, y1: 152 - Math.cos(a) * r1, x2: 152 + Math.sin(a) * r2, y2: 152 - Math.cos(a) * r2 }
 })
-const label = { focus: 'ФОКУС', short: 'ПЕРЕРЫВ', long: 'ДЛИННЫЙ ПЕРЕРЫВ' }
+const label = (p: FaceProps['phase']) => ({ focus: t('ФОКУС', 'FOCUS'), short: t('ПЕРЕРЫВ', 'BREAK'), long: t('ДЛИННЫЙ ПЕРЕРЫВ', 'LONG BREAK') })[p]
 
 export default function Instrument(p: FaceProps) {
   const frac = 1 - p.left / p.total
@@ -15,11 +16,11 @@ export default function Instrument(p: FaceProps) {
   return (
     <div className="ins">
       <header className="ins-top">
-        <button onClick={p.onStats} aria-label="Статистика" title="Статистика (A)" className="ins-icon press"><IconStats /></button>
+        <button onClick={p.onStats} aria-label={t('Статистика', 'Stats')} title={t('Статистика (A)', 'Stats (A)')} className="ins-icon press"><IconStats /></button>
         <span>POMIDORO</span>
         <span><i className="ins-led" /> {String(Math.min(p.done + 1, p.longEvery)).padStart(2, '0')} / {String(p.longEvery).padStart(2, '0')}</span>
-        <button onClick={p.onHelp} aria-label="Горячие клавиши" title="Горячие клавиши (?)" className="ins-icon ins-keys press"><IconKeys /></button>
-        <button onClick={p.onSettings} aria-label="Настройки" title="Настройки (S)" className="ins-icon press"><IconSettings /></button>
+        <button onClick={p.onHelp} aria-label={t('Горячие клавиши', 'Keyboard shortcuts')} title={t('Горячие клавиши (?)', 'Keyboard shortcuts (?)')} className="ins-icon ins-keys press"><IconKeys /></button>
+        <button onClick={p.onSettings} aria-label={t('Настройки', 'Settings')} title={t('Настройки (S)', 'Settings (S)')} className="ins-icon press"><IconSettings /></button>
       </header>
 
       <div className="ins-dial" key={p.phase}>
@@ -36,26 +37,26 @@ export default function Instrument(p: FaceProps) {
                 <div className="ins-breath" style={{ scale: st.big ? 1 : 0.6, transitionDuration: `${st.step.sec}s` }} />
                 <div className="ins-breath two" style={{ scale: st.big ? 1 : 0.6, transitionDuration: `${st.step.sec}s` }} />
                 <div className="relative">
-                  <div className="ins-lbl" key={st.index}>{st.step.text.toUpperCase()}</div>
+                  <div className="ins-lbl" key={st.index}>{tr(st.step.text).toUpperCase()}</div>
                   <div className="ins-digits sm">{st.left}</div>
                 </div>
               </>
             ) : st ? (
               <div className="ins-step fade-up" key={st.index}>
-                <div className="ins-lbl">ШАГ {st.index + 1} / {st.count}</div>
-                <p>{st.step.text}</p>
+                <div className="ins-lbl">{t('ШАГ', 'STEP')} {st.index + 1} / {st.count}</div>
+                <p>{tr(st.step.text)}</p>
                 <div className="ins-digits sm">{st.left}</div>
               </div>
             ) : (
-              <div className="ins-step fade-up"><div className="ins-lbl">ГОТОВО</div><p>Просто отдохните до конца перерыва</p></div>
+              <div className="ins-step fade-up"><div className="ins-lbl">{t('ГОТОВО', 'DONE')}</div><p>{t('Просто отдохните до конца перерыва', 'Just rest until the break ends')}</p></div>
             )
           ) : (
             <div>
-              <div className="ins-lbl">{label[p.phase]}</div>
+              <div className="ins-lbl">{label(p.phase)}</div>
               <div className="ins-digits">
                 {mm}<span className={p.running ? 'ins-colon blink' : 'ins-colon'}>:</span>{ss}
               </div>
-              <div className="ins-sub">{p.running ? (p.phase === 'focus' ? 'ДО ПЕРЕРЫВА' : 'ОТДЫХ') : 'НАЖМИТЕ СТАРТ'}</div>
+              <div className="ins-sub">{p.running ? (p.phase === 'focus' ? t('ДО ПЕРЕРЫВА', 'UNTIL BREAK') : t('ОТДЫХ', 'REST')) : t('НАЖМИТЕ СТАРТ', 'PRESS START')}</div>
             </div>
           )}
         </div>
@@ -63,23 +64,23 @@ export default function Instrument(p: FaceProps) {
 
       {p.exercise && (
         <div className="ins-meta">
-          {p.exercise.title.toUpperCase()} · {mm}:{ss}
-          {p.canSwap && <button onClick={p.onSwap} className="ins-link" title="Другое упражнение (E)">ДРУГОЕ</button>}
+          {tr(p.exercise.title).toUpperCase()} · {mm}:{ss}
+          {p.canSwap && <button onClick={p.onSwap} className="ins-link" title={t('Другое упражнение (E)', 'Another exercise (E)')}>{t('ДРУГОЕ', 'ANOTHER')}</button>}
         </div>
       )}
 
       <div className="ins-ctrl">
-        <button className="ins-txt press" onClick={p.onReset} disabled={!p.started} title={p.started ? 'Сброс (R)' : 'Нечего сбрасывать: фаза не начата'}>СБРОС</button>
-        <button className="ins-play press" onClick={p.onToggle} aria-label={actionLabel(p)} title={`${actionLabel(p)} (пробел)`}>
+        <button className="ins-txt press" onClick={p.onReset} disabled={!p.started} title={p.started ? t('Сброс (R)', 'Reset (R)') : t('Нечего сбрасывать: фаза не начата', 'Nothing to reset yet')}>{t('СБРОС', 'RESET')}</button>
+        <button className="ins-play press" onClick={p.onToggle} aria-label={actionLabel(p)} title={`${actionLabel(p)} (${t('пробел', 'space')})`}>
           {p.running ? <IconPause /> : <IconPlay />}
         </button>
-        <button className="ins-txt press" onClick={p.onSkip} title="Далее (N)">ДАЛЕЕ</button>
+        <button className="ins-txt press" onClick={p.onSkip} title={t('Далее (N)', 'Next (N)')}>{t('ДАЛЕЕ', 'NEXT')}</button>
       </div>
 
-      <div className="ins-segs" aria-label={`Сессий в цикле: ${p.done} из ${p.longEvery}`}>
+      <div className="ins-segs" aria-label={t(`Сессий в цикле: ${p.done} из ${p.longEvery}`, `Sessions in cycle: ${p.done} of ${p.longEvery}`)}>
         {Array.from({ length: p.longEvery }, (_, i) => <span key={i} className={i < p.done ? 'on' : i === p.done && p.phase === 'focus' ? 'cur' : ''} />)}
       </div>
-      <div className="ins-foot">СЕГОДНЯ {p.today.count} · {p.today.min} МИН · СЕРИЯ {p.streak} ДН</div>
+      <div className="ins-foot">{t(`СЕГОДНЯ ${p.today.count} · ${p.today.min} МИН · СЕРИЯ ${p.streak} ДН`, `TODAY ${p.today.count} · ${p.today.min} MIN · STREAK ${p.streak} D`)}</div>
     </div>
   )
 }

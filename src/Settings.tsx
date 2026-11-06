@@ -2,6 +2,7 @@ import { useId, useState } from 'react'
 import { categories, exercises, type Category } from './exercises.ts'
 import { palettes, type Palette, type Settings as S } from './timer.ts'
 import Panel from './Panel.tsx'
+import { langs, t, tr } from './i18n.ts'
 
 interface Props {
   open: boolean
@@ -21,55 +22,65 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
     set('exercises', s.exercises.includes(id) ? s.exercises.filter((x) => x !== id) : [...s.exercises, id])
 
   return (
-    <Panel open={open} title="Настройки" side="right" onClose={onClose}>
-      <Section no="00" title="Тема">
+    <Panel open={open} title={t('Настройки', 'Settings')} side="right" onClose={onClose}>
+      <Section no="00" title={t('Язык', 'Language')}>
         <div className="seg">
-          {(['system', 'dark', 'light'] as const).map((t) => (
-            <button key={t} aria-pressed={s.theme === t} onClick={() => set('theme', t)} className="press">
-              {{ system: 'Авто', dark: 'Тёмная', light: 'Светлая' }[t]}
+          {langs.map((l) => (
+            <button key={l} lang={l} aria-pressed={s.lang === l} onClick={() => set('lang', l)} className="press">
+              {{ ru: 'Русский', en: 'English' }[l]}
             </button>
           ))}
         </div>
       </Section>
 
-      <Section no="00" title="Палитра">
+      <Section no="00" title={t('Тема', 'Theme')}>
+        <div className="seg">
+          {(['system', 'dark', 'light'] as const).map((th) => (
+            <button key={th} aria-pressed={s.theme === th} onClick={() => set('theme', th)} className="press">
+              {{ system: t('Авто', 'Auto'), dark: t('Тёмная', 'Dark'), light: t('Светлая', 'Light') }[th]}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section no="00" title={t('Палитра', 'Palette')}>
         <div className="palettes">
           {(Object.keys(palettes) as Palette[]).map((id) => (
             <button key={id} data-palette={id} className="pal press" aria-pressed={s.palette === id} onClick={() => set('palette', id)}>
               <span className="pal-dots" aria-hidden><i className="f" /><i className="s" /><i className="l" /></span>
-              {palettes[id]}
+              {tr(palettes[id])}
             </button>
           ))}
         </div>
-        <p className="set-note mt-2">Цвета фокуса, короткого и длинного перерыва.</p>
+        <p className="set-note mt-2">{t('Цвета фокуса, короткого и длинного перерыва.', 'Colors for focus, short and long breaks.')}</p>
       </Section>
 
-      <Section no="01" title="Длительность">
+      <Section no="01" title={t('Длительность', 'Durations')}>
         <div className="set-group">
-          <Num label="Фокус, мин" value={s.focusMin} min={1} max={180} onChange={(v) => set('focusMin', v)} />
-          <Num label="Короткий перерыв" value={s.shortMin} min={1} max={60} onChange={(v) => set('shortMin', v)} />
-          <Num label="Длинный перерыв" value={s.longMin} min={1} max={90} onChange={(v) => set('longMin', v)} />
-          <Num label="Сессий до длинного" value={s.longEvery} min={1} max={12} onChange={(v) => set('longEvery', v)} />
+          <Num label={t('Фокус, мин', 'Focus, min')} value={s.focusMin} min={1} max={180} onChange={(v) => set('focusMin', v)} />
+          <Num label={t('Короткий перерыв', 'Short break')} value={s.shortMin} min={1} max={60} onChange={(v) => set('shortMin', v)} />
+          <Num label={t('Длинный перерыв', 'Long break')} value={s.longMin} min={1} max={90} onChange={(v) => set('longMin', v)} />
+          <Num label={t('Сессий до длинного', 'Sessions before long')} value={s.longEvery} min={1} max={12} onChange={(v) => set('longEvery', v)} />
         </div>
       </Section>
 
-      <Section no="02" title="Поведение">
+      <Section no="02" title={t('Поведение', 'Behavior')}>
         <div className="set-group">
-          <Switch label="Автостарт перерывов" on={s.autoStartBreaks} onChange={() => set('autoStartBreaks', !s.autoStartBreaks)} />
-          <Switch label="Автостарт фокуса" on={s.autoStartFocus} onChange={() => set('autoStartFocus', !s.autoStartFocus)} />
-          <Switch label="Звук" on={s.sound} onChange={() => set('sound', !s.sound)} />
+          <Switch label={t('Автостарт перерывов', 'Auto-start breaks')} on={s.autoStartBreaks} onChange={() => set('autoStartBreaks', !s.autoStartBreaks)} />
+          <Switch label={t('Автостарт фокуса', 'Auto-start focus')} on={s.autoStartFocus} onChange={() => set('autoStartFocus', !s.autoStartFocus)} />
+          <Switch label={t('Звук', 'Sound')} on={s.sound} onChange={() => set('sound', !s.sound)} />
         </div>
       </Section>
 
-      <Section no="03" title="Упражнения">
-        <p className="set-note">Выбранные чередуются в перерывах. Ничего не выбрано — обычный отдых.</p>
+      <Section no="03" title={t('Упражнения', 'Exercises')}>
+        <p className="set-note">{t('Выбранные чередуются в перерывах. Ничего не выбрано — обычный отдых.', 'Selected ones rotate between breaks. None selected means a plain rest.')}</p>
         {(Object.keys(categories) as Category[]).map((c) => (
           <div key={c}>
-            <div className="set-sub">{categories[c]}</div>
+            <div className="set-sub">{tr(categories[c])}</div>
             <div className="chips">
               {exercises.filter((e) => e.category === c).map((e) => (
                 <button key={e.id} className="chip press" aria-pressed={s.exercises.includes(e.id)} onClick={() => toggleEx(e.id)}>
-                  {e.title}
+                  {tr(e.title)}
                 </button>
               ))}
             </div>
@@ -77,12 +88,12 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
         ))}
       </Section>
 
-      <Section no="04" title="Данные">
-        <p className="set-note">Файл переносит историю и настройки на другое устройство. При импорте история объединяется.</p>
+      <Section no="04" title={t('Данные', 'Data')}>
+        <p className="set-note">{t('Файл переносит историю и настройки на другое устройство. При импорте история объединяется.', 'A file moves history and settings to another device. Import merges the history.')}</p>
         <div className="seg">
-          <button onClick={onExport} className="press">Экспорт</button>
+          <button onClick={onExport} className="press">{t('Экспорт', 'Export')}</button>
           <label className="press seg-label">
-            Импорт
+            {t('Импорт', 'Import')}
             <input
               type="file"
               accept="application/json,.json"
@@ -98,7 +109,7 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
         {msg && <p className="set-note fade-up mt-2" role="status">{msg}</p>}
       </Section>
 
-      <p className="set-note mt-6">Все данные хранятся только в этом браузере. Горячие клавиши: ?</p>
+      <p className="set-note mt-6">{t('Все данные хранятся только в этом браузере. Горячие клавиши: ?', 'All data stays in this browser. Keyboard shortcuts: ?')}</p>
     </Panel>
   )
 }
@@ -121,7 +132,7 @@ function Num({ label, value, min, max, onChange }: { label: string; value: numbe
     <div className="set-row">
       <span>{label}</span>
       <span className="stepper">
-        <button className="press" aria-label={`${label}: меньше`} onClick={() => commit(value - 1)} disabled={value <= min}>−</button>
+        <button className="press" aria-label={`${label}: ${t('меньше', 'less')}`} onClick={() => commit(value - 1)} disabled={value <= min}>−</button>
         <input
           type="number"
           inputMode="numeric"
@@ -131,7 +142,7 @@ function Num({ label, value, min, max, onChange }: { label: string; value: numbe
           onBlur={(e) => commit(e.currentTarget.valueAsNumber)}
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
         />
-        <button className="press" aria-label={`${label}: больше`} onClick={() => commit(value + 1)} disabled={value >= max}>+</button>
+        <button className="press" aria-label={`${label}: ${t('больше', 'more')}`} onClick={() => commit(value + 1)} disabled={value >= max}>+</button>
       </span>
     </div>
   )

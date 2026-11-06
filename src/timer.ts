@@ -1,6 +1,10 @@
 export type Phase = 'focus' | 'short' | 'long'
 // Colors live in index.css under [data-palette=…]; this is the list of ids and names.
-export const palettes = { classic: 'Классика', ocean: 'Океан', sunset: 'Закат', forest: 'Лес', neon: 'Неон', amber: 'Янтарь', mono: 'Монохром' } as const
+import { browserLang, type L, type Lang } from './i18n.ts'
+export const palettes: Record<'classic' | 'ocean' | 'sunset' | 'forest' | 'neon' | 'amber' | 'mono', L> = {
+  classic: ['Классика', 'Classic'], ocean: ['Океан', 'Ocean'], sunset: ['Закат', 'Sunset'], forest: ['Лес', 'Forest'],
+  neon: ['Неон', 'Neon'], amber: ['Янтарь', 'Amber'], mono: ['Монохром', 'Mono'],
+}
 export type Palette = keyof typeof palettes
 
 export interface Settings {
@@ -14,6 +18,7 @@ export interface Settings {
   exercises: string[] // enabled exercise ids, may be empty
   palette: Palette
   theme: 'system' | 'dark' | 'light'
+  lang: Lang
   updatedAt: number
 }
 
@@ -37,6 +42,7 @@ export const defaultSettings: Settings = {
   exercises: ['box', 'rule-20', 'neck'],
   palette: 'classic',
   theme: 'system',
+  lang: browserLang(),
   updatedAt: 0,
 }
 

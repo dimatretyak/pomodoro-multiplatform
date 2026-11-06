@@ -104,3 +104,14 @@ test('week compare', () => {
   assert.deepEqual(weekCompare([...Array(7).fill(d(10)), ...Array(7).fill(d(15))]), { cur: 105, prev: 70, pct: 50 })
   assert.equal(weekCompare(Array(14).fill(d(0))).pct, null)
 })
+
+import { plural, setLang } from './i18n.ts'
+
+test('plurals in both languages', () => {
+  const w = (n: number) => plural(n, ['день', 'дня', 'дней'], ['day', 'days'])
+  setLang('ru')
+  assert.deepEqual([1, 2, 5, 11, 21, 22, 25].map(w), ['день', 'дня', 'дней', 'дней', 'день', 'дня', 'дней'])
+  setLang('en')
+  assert.deepEqual([1, 2, 0].map(w), ['day', 'days', 'days'])
+  setLang('ru')
+})

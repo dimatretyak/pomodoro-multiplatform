@@ -1,4 +1,5 @@
 import { exercises } from './exercises.ts'
+import { langs, t } from './i18n.ts'
 import { defaultSettings, initialState, palettes, retime, type Phase, type Settings, type TimerState } from './timer.ts'
 
 // All data lives in this browser's localStorage. Records are plain JSON with
@@ -47,6 +48,7 @@ function cleanSettings(raw: any): Partial<Settings> {
     const v = raw[k]
     if (typeof v !== typeof def) continue
     if (k === 'exercises') out[k] = Array.isArray(v) ? v.filter((id) => exercises.some((e) => e.id === id)) : def
+    else if (k === 'lang') out[k] = langs.includes(v) ? v : def
     else if (k === 'theme') out[k] = ['system', 'dark', 'light'].includes(v) ? v : def
     else if (k === 'palette') out[k] = Object.hasOwn(palettes, v) ? v : def
     else if (typeof def === 'number' && k !== 'updatedAt') {
@@ -62,7 +64,7 @@ function cleanSettings(raw: any): Partial<Settings> {
  */
 export function mergeImport(cur: Data, raw: unknown): { data: Data; added: number } {
   const r = raw as any
-  if (!r || typeof r !== 'object' || !Array.isArray(r.history)) throw new Error('Это не файл Pomidoro')
+  if (!r || typeof r !== 'object' || !Array.isArray(r.history)) throw new Error(t('Это не файл Pomidoro', 'Not a Pomidoro file'))
   const ids = new Set(cur.history.map((h) => h.id))
   const fresh = (r.history as unknown[]).filter(isRecord).filter((h) => !ids.has(h.id) && ids.add(h.id))
   const incoming = cleanSettings(r.settings)

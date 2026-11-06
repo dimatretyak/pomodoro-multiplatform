@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { t } from './i18n.ts'
 
 interface Props {
   open: boolean
@@ -27,7 +28,7 @@ export default function Panel({ open, title, side, onClose, children }: Props) {
       <aside ref={ref} tabIndex={-1} role="dialog" aria-label={title} className="panel">
         <div className="panel-head">
           <h2>{title}</h2>
-          <button onClick={onClose} aria-label="Закрыть" className="panel-x press">✕</button>
+          <button onClick={onClose} aria-label={t('Закрыть', 'Close')} className="panel-x press">✕</button>
         </div>
         {children}
       </aside>
