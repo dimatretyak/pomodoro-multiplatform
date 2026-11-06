@@ -30,9 +30,13 @@ export function unlock() {
   if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission()
 }
 
-export function notify(title: string, body: string) {
+export async function notify(title: string, body: string) {
   if (!('Notification' in window) || Notification.permission !== 'granted' || document.hasFocus()) return
-  const n = new Notification(title, { body, icon: '/icon.svg', tag: 'pomidoro' })
+  const opts = { body, icon: '/icon.svg', tag: 'pomidoro' }
+  // Via the service worker when present: required on Android, click focuses the tab (see sw.js).
+  const reg = await navigator.serviceWorker?.getRegistration()
+  if (reg) return reg.showNotification(title, opts)
+  const n = new Notification(title, opts)
   n.onclick = () => {
     window.focus()
     n.close()
