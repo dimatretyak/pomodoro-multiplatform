@@ -8,12 +8,12 @@ import Settings from './Settings.tsx'
 import Stats, { sessionsWord } from './Stats.tsx'
 import { phaseLabel, type FaceProps } from './face.tsx'
 import Instrument from './Instrument.tsx'
+import Hotkeys from './Hotkeys.tsx'
 
 export default function App() {
   const [data, setData] = useState(load)
   const [now, setNow] = useState(Date.now)
-  const [open, setOpen] = useState(false)
-  const [statsOpen, setStatsOpen] = useState(false)
+  const [panel, setPanel] = useState<'settings' | 'stats' | 'help' | null>(null)
   const { settings, timer, history } = data
   const running = timer.endAt !== null
   const left = remainingMs(timer, now)
@@ -89,16 +89,6 @@ export default function App() {
     setNow(n)
   }, [])
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' || open || statsOpen || (e.target as HTMLElement).closest('input,select,textarea')) return
-      e.preventDefault()
-      toggle()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [toggle, open, statsOpen])
-
   const saveSettings = (s: S) =>
     setData((d) => ({
       ...d,
@@ -147,20 +137,45 @@ export default function App() {
     },
     onSkip: () => advance(false),
     onSwap: swapExercise,
-    onSettings: () => setOpen(true),
-    onStats: () => setStatsOpen(true),
+    onSettings: () => setPanel('settings'),
+    onStats: () => setPanel('stats'),
+    onHelp: () => setPanel('help'),
   }
+
+  // Hotkeys (see Hotkeys.tsx). e.code = physical key, so they work on any layout (ЙЦУКЕН too).
+  const latest = useRef({ props, panel })
+  latest.current = { props, panel }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.repeat || (e.target as HTMLElement).closest('input,select,textarea')) return
+      const { props: p, panel: open } = latest.current
+      const flip = (name: NonNullable<typeof open>) => setPanel(open === name ? null : name)
+      if (e.code === 'Slash' && e.shiftKey) flip('help')
+      else if (e.code === 'KeyA') flip('stats')
+      else if (e.code === 'KeyS') flip('settings')
+      else if (open) return // timer keys only on the main screen
+      else if (e.code === 'Space') p.onToggle()
+      else if (e.code === 'KeyR') p.onReset()
+      else if (e.code === 'KeyN' || e.code === 'ArrowRight') p.onSkip()
+      else if (e.code === 'KeyE' && p.exercise && p.canSwap) p.onSwap()
+      else return
+      e.preventDefault()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <>
       <main className="select-none">
         <Instrument {...props} />
       </main>
-      <Stats open={statsOpen} history={history} onClose={() => setStatsOpen(false)} />
+      <Stats open={panel === 'stats'} history={history} onClose={() => setPanel(null)} />
+      <Hotkeys open={panel === 'help'} onClose={() => setPanel(null)} />
       <Settings
-        open={open}
+        open={panel === 'settings'}
         settings={settings}
-        onClose={() => setOpen(false)}
+        onClose={() => setPanel(null)}
         onChange={saveSettings}
         onExport={() => download(data)}
         onImport={importFile}

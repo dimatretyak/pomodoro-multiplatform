@@ -1,4 +1,4 @@
-import { actionLabel, IconPause, IconPlay, IconSettings, IconStats, split, stepInfo, type FaceProps } from './face.tsx'
+import { actionLabel, IconKeys, IconPause, IconPlay, IconSettings, IconStats, split, stepInfo, type FaceProps } from './face.tsx'
 
 const TICKS = Array.from({ length: 60 }, (_, i) => {
   const a = (i / 60) * Math.PI * 2, major = i % 5 === 0, r1 = major ? 124 : 132, r2 = 144
@@ -15,10 +15,11 @@ export default function Instrument(p: FaceProps) {
   return (
     <div className="ins">
       <header className="ins-top">
-        <button onClick={p.onStats} aria-label="Статистика" className="ins-icon press"><IconStats /></button>
+        <button onClick={p.onStats} aria-label="Статистика" title="Статистика (A)" className="ins-icon press"><IconStats /></button>
         <span>POMIDORO</span>
         <span><i className="ins-led" /> {String(Math.min(p.done + 1, p.longEvery)).padStart(2, '0')} / {String(p.longEvery).padStart(2, '0')}</span>
-        <button onClick={p.onSettings} aria-label="Настройки" className="ins-icon press"><IconSettings /></button>
+        <button onClick={p.onHelp} aria-label="Горячие клавиши" title="Горячие клавиши (?)" className="ins-icon ins-keys press"><IconKeys /></button>
+        <button onClick={p.onSettings} aria-label="Настройки" title="Настройки (S)" className="ins-icon press"><IconSettings /></button>
       </header>
 
       <div className="ins-dial" key={p.phase}>
@@ -63,16 +64,16 @@ export default function Instrument(p: FaceProps) {
       {p.exercise && (
         <div className="ins-meta">
           {p.exercise.title.toUpperCase()} · {mm}:{ss}
-          {p.canSwap && <button onClick={p.onSwap} className="ins-link">ДРУГОЕ</button>}
+          {p.canSwap && <button onClick={p.onSwap} className="ins-link" title="Другое упражнение (E)">ДРУГОЕ</button>}
         </div>
       )}
 
       <div className="ins-ctrl">
-        <button className="ins-txt press" onClick={p.onReset}>СБРОС</button>
-        <button className="ins-play press" onClick={p.onToggle} aria-label={actionLabel(p)}>
+        <button className="ins-txt press" onClick={p.onReset} title="Сброс (R)">СБРОС</button>
+        <button className="ins-play press" onClick={p.onToggle} aria-label={actionLabel(p)} title={`${actionLabel(p)} (пробел)`}>
           {p.running ? <IconPause /> : <IconPlay />}
         </button>
-        <button className="ins-txt press" onClick={p.onSkip}>ДАЛЕЕ</button>
+        <button className="ins-txt press" onClick={p.onSkip} title="Далее (N)">ДАЛЕЕ</button>
       </div>
 
       <div className="ins-segs" aria-label={`Сессий в цикле: ${p.done} из ${p.longEvery}`}>

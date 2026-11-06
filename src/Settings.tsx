@@ -98,7 +98,7 @@ export default function Settings({ open, settings: s, onClose, onChange, onExpor
         {msg && <p className="set-note fade-up mt-2" role="status">{msg}</p>}
       </Section>
 
-      <p className="set-note mt-6">Все данные хранятся только в этом браузере. Пробел — старт/пауза.</p>
+      <p className="set-note mt-6">Все данные хранятся только в этом браузере. Горячие клавиши: ?</p>
     </Panel>
   )
 }

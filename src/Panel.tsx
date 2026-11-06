@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 interface Props {
   open: boolean
   title: string
-  side: 'left' | 'right'
+  side: 'left' | 'right' | 'center'
   onClose: () => void
   children: React.ReactNode
 }

@@ -20,6 +20,7 @@ export interface FaceProps {
   onSwap: () => void
   onSettings: () => void
   onStats: () => void
+  onHelp: () => void
 }
 
 export const phaseLabel: Record<Phase, string> = { focus: 'Фокус', short: 'Короткий перерыв', long: 'Длинный перерыв' }
@@ -48,6 +49,7 @@ const I = ({ d, size = 20 }: { d: string; size?: number }) => (
 )
 export const IconStats = () => <I d="M5 20V12M10 20V6M15 20v-9M20 20V9" />
 export const IconSettings = () => <I d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M16 4v4M10 10v4M18 16v4" />
+export const IconKeys = () => <I d="M3 7h18v10H3zM7 11h.01M11 11h.01M15 11h.01M8 14h8" />
 export const IconReset = () => <I d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
 export const IconSkip = () => <I d="M5 4l10 8-10 8zM19 5v14" />
 export const IconPlay = ({ size = 22 }) => (
